@@ -1,25 +1,19 @@
-use std::marker::PhantomData;
-
-use crate::{drafts::Autodetect, Draft};
-
-pub struct JsonSchemaValidator<D: Draft = Autodetect> {
-    nodes: Vec<JsonSchemaValidatorNode<D>>,
+pub struct JsonSchemaValidator {
+    nodes: Vec<JsonSchemaValidatorNode>,
 }
 
-impl<D: Draft> JsonSchemaValidator<D> {
-    pub(crate) fn new(nodes: Vec<JsonSchemaValidatorNode<D>>) -> Self {
+impl JsonSchemaValidator {
+    pub(crate) fn new(nodes: Vec<JsonSchemaValidatorNode>) -> Self {
         Self { nodes }
     }
 }
 
-pub(crate) struct JsonSchemaValidatorNode<D: Draft> {
-    keyword: Keyword<D>,
+pub(crate) struct JsonSchemaValidatorNode {
+    keyword: Keyword,
 }
 
-enum Keyword<D: Draft> {
-    Type(Type<D>),
+enum Keyword {
+    Type(Type),
 }
 
-struct Type<D: Draft> {
-    _phantom: PhantomData<D>,
-}
+struct Type {}
