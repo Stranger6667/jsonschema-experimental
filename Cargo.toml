@@ -1,0 +1,24 @@
+[package]
+name = "jsonschema"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+members = [
+    "crates/jsonlike",
+    "crates/referencing",
+    "crates/referencing-suite",
+]
+
+[dependencies]
+serde_json = { version = "1", optional = true }
+# TODO: it should be optional
+tokio = { version = "1.34", features = ["full"] }
+
+[features]
+default = ["serde_json"]
+
+serde_json = ["dep:serde_json", "jsonlike/serde_json"]
+
+[dependencies.jsonlike]
+path = "crates/jsonlike"
