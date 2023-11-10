@@ -1,9 +1,11 @@
 use std::marker::PhantomData;
 
-use crate::{compiler, drafts::Autodetect, error::BuildError, Draft, JsonSchema};
+use crate::{compiler, drafts::Autodetect, error::BuildError, Draft, JsonSchemaValidator};
 use jsonlike::Json;
 
-pub(crate) async fn build<'a, 'b: 'a, D: Draft>(schema: &'b impl Json<'a>) -> JsonSchema<D> {
+pub(crate) async fn build<'a, 'b: 'a, D: Draft>(
+    schema: &'b impl Json<'a>,
+) -> JsonSchemaValidator<D> {
     // TODO: resolve
     compiler::compile::<D>(schema)
 }
@@ -22,7 +24,7 @@ impl<D: Draft> Builder<D> {
     pub async fn build<'a, 'b: 'a>(
         self,
         schema: &'b impl Json<'a>,
-    ) -> Result<JsonSchema<D>, BuildError> {
+    ) -> Result<JsonSchemaValidator<D>, BuildError> {
         todo!()
     }
 }
@@ -32,7 +34,7 @@ pub mod blocking {
 
     use jsonlike::Json;
 
-    use crate::{drafts::Autodetect, error::BuildError, Draft, JsonSchema};
+    use crate::{drafts::Autodetect, error::BuildError, Draft, JsonSchemaValidator};
 
     pub struct Builder<D: Draft = Autodetect> {
         _phantom: PhantomData<D>,
@@ -48,7 +50,7 @@ pub mod blocking {
         pub fn build<'a, 'b: 'a>(
             self,
             schema: &'b impl Json<'a>,
-        ) -> Result<JsonSchema<D>, BuildError> {
+        ) -> Result<JsonSchemaValidator<D>, BuildError> {
             todo!()
         }
     }
