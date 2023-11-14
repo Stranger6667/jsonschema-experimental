@@ -36,6 +36,10 @@ Inspiration
 - https://github.com/timothee-haudebourg/generic-json/
 - https://github.com/macisamuele/json-trait-rs/
 
+Inspiration
+- https://github.com/timothee-haudebourg/generic-json/
+- https://github.com/macisamuele/json-trait-rs/
+
 ## License
 
 This project is licensed under the MIT License.
