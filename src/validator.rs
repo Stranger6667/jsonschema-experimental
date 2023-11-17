@@ -9,9 +9,7 @@ pub struct Validator<D: Draft = Autodetect> {
 }
 
 impl<D: Draft> Validator<D> {
-    pub async fn from_schema<'a, 'b: 'a>(
-        schema: &'b impl Json<'a>,
-    ) -> Result<JsonSchemaValidator, SchemaError> {
+    pub async fn from_schema<J: Json>(schema: &J) -> Result<JsonSchemaValidator, SchemaError> {
         ValidatorOptions::<D>::new().build(schema).await
     }
 
@@ -31,12 +29,9 @@ impl<D: Draft> ValidatorOptions<D> {
         }
     }
 
-    pub async fn build<'a, 'b: 'a>(
-        self,
-        schema: &'b impl Json<'a>,
-    ) -> Result<JsonSchemaValidator, SchemaError> {
+    pub async fn build<J: Json>(self, schema: &J) -> Result<JsonSchemaValidator, SchemaError> {
         // TODO: resolve
-        compiler::compile::<D>(schema)
+        compiler::compile::<J, D>(schema)
     }
 }
 
@@ -50,9 +45,7 @@ pub mod blocking {
     }
 
     impl<D: Draft> Validator<D> {
-        pub fn from_schema<'a, 'b: 'a>(
-            schema: &'b impl Json<'a>,
-        ) -> Result<JsonSchemaValidator, SchemaError> {
+        pub fn from_schema<J: Json>(schema: &J) -> Result<JsonSchemaValidator, SchemaError> {
             ValidatorOptions::<D>::new().build(schema)
         }
 
@@ -71,12 +64,9 @@ pub mod blocking {
             }
         }
 
-        pub fn build<'a, 'b: 'a>(
-            self,
-            schema: &'b impl Json<'a>,
-        ) -> Result<JsonSchemaValidator, SchemaError> {
+        pub fn build<J: Json>(self, schema: &J) -> Result<JsonSchemaValidator, SchemaError> {
             // TODO: resolve
-            compiler::compile::<D>(schema)
+            compiler::compile::<J, D>(schema)
         }
     }
 }
