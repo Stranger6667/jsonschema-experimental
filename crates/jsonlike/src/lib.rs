@@ -10,6 +10,10 @@ pub mod prelude {
     pub use crate::{error::JsonError, Json, JsonArray, JsonNumber, JsonObject};
 }
 
+// TODO:
+//  - Add `contains_key`
+//  - Add `get` for arrays
+
 pub trait Json: fmt::Debug {
     type Object: JsonObject<Value = Self>;
     type Array: JsonArray<Element = Self>;
