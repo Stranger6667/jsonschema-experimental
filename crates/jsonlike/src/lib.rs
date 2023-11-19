@@ -13,6 +13,7 @@ pub mod prelude {
 // TODO:
 //  - Add `contains_key`
 //  - Add `get` for arrays
+//  - Implement `Eq`
 
 pub trait Json: fmt::Debug {
     type Object: JsonObject<Value = Self>;
