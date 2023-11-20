@@ -11,7 +11,6 @@ pub mod prelude {
 }
 
 // TODO:
-//  - Add `contains_key`
 //  - Implement `Eq`
 
 pub trait Json: fmt::Debug {
