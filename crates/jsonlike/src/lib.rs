@@ -10,9 +10,6 @@ pub mod prelude {
     pub use crate::{error::JsonError, Json, JsonArray, JsonNumber, JsonObject};
 }
 
-// TODO:
-//  - Implement `Eq`
-
 pub trait Json: fmt::Debug {
     type Object: JsonObject<Value = Self>;
     type Array: JsonArray<Element = Self>;
