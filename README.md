@@ -18,9 +18,7 @@ use serde_json::json;
 jsonschema::is_valid(&json!({"type": "integer"}), &json!(5));
 
 // Macro for validator (async by default, autodetect draft, defaults to latest)
-let validator = validator!({"type": "integer"})
-    .await
-    .expect("Invalid schema");
+let validator = validator!({"type": "integer"}).await?;
 
 // Boolean result
 validator.is_valid(&json!(5));
@@ -42,24 +40,16 @@ let verbose: serde_json::Value = result.format(formats::Verbose);
 let verbose: serde_yaml::Value = result.format(formats::Basic);
 
 // Validator for a specific draft (`draft4` feature)
-let validator = draft4::validator!({"type": "integer"})
-    .await
-    .expect("Invalid schema");
+let validator = draft4::validator!({"type": "integer"}).await?;
 
 // Non-macro
 let schema = json!({"type": "integer"});
-let validator = Validator::from_schema(&schema)
-    .await
-    .expect("Invalid schema");
-let validator = draft4::Validator::from_schema(&schema)
-    .await
-    .expect("Invalid schema");
+let validator = Validator::from_schema(&schema).await?;
+let validator = draft4::Validator::from_schema(&schema).await?;
 
 // Blocking ref resolving
-let validator = blocking::Validator::from_schema(&schema)
-    .expect("Invalid schema");
-let validator = blocking::draft4::Validator::from_schema(&schema)
-    .expect("Invalid schema");
+let validator = blocking::Validator::from_schema(&schema)?;
+let validator = blocking::draft4::Validator::from_schema(&schema)?;
 
 // Configuration
 let validator = Validator::options()
@@ -70,6 +60,5 @@ let validator = Validator::options()
     // Completely custom behavior for the `my-keyword` keyword
     .with_keyword("my-keyword", CustomKeywordValidator::new(42))
     .build(&schema)
-    .await
-    .expect("Invalid schema");
+    .await?;
 ```
