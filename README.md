@@ -11,7 +11,7 @@ For an in-depth roadmap, please take a look [here](https://github.com/Stranger66
 This is how library API may look like:
 
 ```rust
-use jsonschema::{validator, formats, Validator, draft4, blocking};
+use jsonschema::{validator, Validator, draft4, blocking};
 use serde_json::json;
 
 // One-off validation with a boolean result
@@ -36,8 +36,9 @@ for error in result.errors() {
 }
 
 // Result formatting with different styles (`serde` feature)
-let verbose: serde_json::Value = result.format(formats::Verbose);
-let verbose: serde_yaml::Value = result.format(formats::Basic);
+let verbose: serde_json::Value = result.format().verbose();
+let basic: serde_yaml::Value = result.format().basic();
+let custom: serde_json::Value = result.format().with(MyCustomFormatter);
 
 // Validator for a specific draft (`draft4` feature)
 let validator = draft4::validator!({"type": "integer"}).await?;
