@@ -15,7 +15,7 @@ use jsonschema::{validator, formats, Validator, draft4, blocking};
 use serde_json::json;
 
 // One-off validation with a boolean result
-jsonschema::is_valid(&json!({"type": "integer"}), &json!(5));
+jsonschema::is_valid(&json!({"type": "integer"}), &json!(5)).await?;
 
 // Macro for validator (async by default, autodetect draft, defaults to latest)
 let validator = validator!({"type": "integer"}).await?;
@@ -48,6 +48,7 @@ let validator = Validator::from_schema(&schema).await?;
 let validator = draft4::Validator::from_schema(&schema).await?;
 
 // Blocking ref resolving
+blocking::is_valid(&json!({"type": "integer"}), &json!(5))?;
 let validator = blocking::Validator::from_schema(&schema)?;
 let validator = blocking::draft4::Validator::from_schema(&schema)?;
 
