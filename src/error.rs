@@ -1,21 +1,23 @@
 #[derive(Debug)]
-pub enum JsonSchemaError {
+pub enum Error {
     Validation(ValidationError),
     Schema(SchemaError),
 }
 
-impl From<SchemaError> for JsonSchemaError {
+impl From<SchemaError> for Error {
     fn from(value: SchemaError) -> Self {
-        JsonSchemaError::Schema(value)
+        Error::Schema(value)
     }
 }
 
-impl From<ValidationError> for JsonSchemaError {
+impl From<ValidationError> for Error {
     fn from(value: ValidationError) -> Self {
-        JsonSchemaError::Validation(value)
+        Error::Validation(value)
     }
 }
 
+// TODO: Bound to instance? and maybe validator? Not clear if it is convenient for the end user,
+// check existing library and see what is used there
 #[derive(Debug)]
 pub enum ValidationError {}
 
