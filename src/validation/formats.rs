@@ -1,7 +1,6 @@
 use std::error::Error;
 
 use jsonlike::Json;
-use serde::Deserialize;
 
 use super::ValidationState;
 
@@ -14,26 +13,27 @@ impl<'v, 'i, 's, J: Json> OutputFormatState<'v, 'i, 's, J> {
         OutputFormatState { state }
     }
 
-    pub fn verbose<'de, D: Deserialize<'de>>(&self) -> D {
+    pub fn verbose(&self) -> VerboseOutput {
         todo!()
     }
-    pub fn with<'de, D: Deserialize<'de>, F: OutputFormatter>(&self, formatter: F) -> D {
-        formatter.format::<J, D>(self)
+    pub fn with<F: OutputFormatter>(&self, formatter: F) -> F::Output {
+        formatter.format::<J>(self)
     }
 }
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+pub struct VerboseOutput {}
+
 pub trait OutputFormatter {
     type Error: Error;
+    type Output;
 
-    fn try_format<'v, 'i, 's, 'f, 'de, J: Json, D: Deserialize<'de>>(
+    fn try_format<J: Json>(
         &self,
-        state: &'f OutputFormatState<'v, 'i, 's, J>,
-    ) -> Result<D, Self::Error>;
+        state: &OutputFormatState<J>,
+    ) -> Result<Self::Output, Self::Error>;
 
-    fn format<'v, 'i, 's, 'f, 'de, J: Json, D: Deserialize<'de>>(
-        &self,
-        state: &'f OutputFormatState<'v, 'i, 's, J>,
-    ) -> D {
-        self.try_format::<J, D>(state).expect("Failed to format")
+    fn format<J: Json>(&self, state: &OutputFormatState<J>) -> Self::Output {
+        self.try_format::<J>(state).expect("Failed to format")
     }
 }

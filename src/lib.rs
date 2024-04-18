@@ -1,9 +1,10 @@
 //!  One-off validation:
 //!
 //! ```rust
-//! use serde_json::json;
-//!
+//! #[cfg(feature = "serde_json")]
 //! async fn test() -> Result<(), jsonschema::Error> {
+//!     use serde_json::json;
+//!
 //!     let schema = json!({"type": "integer"});
 //!     let instance = json!("a");
 //!     jsonschema::is_valid(&schema, &instance).await?;
@@ -12,9 +13,7 @@
 //! ```
 //!
 //! ```rust
-//! use serde_json::json;
 //! use jsonlike::Json;
-//! use serde::Deserialize;
 //! use jsonschema::formats::{OutputFormatter, OutputFormatState};
 //!
 //! struct MyFormatter;
@@ -30,28 +29,36 @@
 //!
 //! impl std::error::Error for MyError {}
 //!
+//! struct CustomOutput {}
+//!
 //! impl OutputFormatter for MyFormatter {
 //!     type Error = MyError;
+//!     type Output = CustomOutput;
 //!
-//!    fn try_format<'v, 'i, 's, 'f, 'de, J: Json, T: Deserialize<'de>>(
+//!    fn try_format<J: Json>(
 //!        &self,
-//!        state: &'f OutputFormatState<'v, 'i, 's, J>,
-//!    ) -> Result<T, Self::Error> {
-//!        todo!("Not clear how to do this - should user create their own Deserializer??? or there
-//!        should be some trait implemented?")
+//!        state: &OutputFormatState<J>,
+//!    ) -> Result<Self::Output, Self::Error> {
+//!        Ok(CustomOutput {})
 //!    }
 //! }
 //!
+//! #[cfg(feature = "serde_json")]
 //! async fn test() -> Result<(), jsonschema::Error> {
+//!     use serde_json::json;
+//!
 //!     let schema = json!({"type": "integer"});
 //!     let instance = json!("a");
 //!     let validator = jsonschema::Validator::from_schema(&schema).await?;
-//!     let x = validator.is_valid(&instance);
+//!     assert!(!validator.is_valid(&instance));
 //!     let state = validator.validate(&instance);
-//!     let y = state.is_valid();
+//!     assert!(!state.is_valid());
 //!     for error in state.errors() {
+//!
 //!     }
-//!     let verbose: serde_json::Value = state.format().verbose();
+//!     let verbose = state.format().verbose();
+//!     let v = serde_json::to_string(&verbose).unwrap();
+//!     let custom = state.format().with(MyFormatter);
 //!     for error in jsonschema::validate(&instance, &schema).await?.errors() {
 //!
 //!     }
@@ -87,7 +94,7 @@ pub mod blocking {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "serde"))]
 mod tests {
     use super::*;
     use serde_json::json;
