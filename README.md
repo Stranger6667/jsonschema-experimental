@@ -11,56 +11,67 @@ For an in-depth roadmap, please take a look [here](https://github.com/Stranger66
 This is how library API may look like:
 
 ```rust
-use jsonschema::{validator, Validator, draft4, blocking};
-use serde_json::json;
+use jsonschema::format;
 
-// One-off validation with a boolean result
-jsonschema::is_valid(&json!({"type": "integer"}), &json!(5)).await?;
+async fn test() -> Result<(), jsonschema::Error> {
+    let schema = serde_json::json!({"type": "integer"});
+    let instance = serde_json::json!("a");
 
-// Macro for validator (async by default, autodetect draft, defaults to latest)
-let validator = validator!({"type": "integer"}).await?;
+    // One-off validation with a boolean result
+    jsonschema::is_valid(&instance, &schema).await?;
+    jsonschema::blocking::is_valid(&instance, &schema)?;
+    // One-off with the first error as `Result<(), jsonschema::Error>`
+    jsonschema::validate(&instance, &schema).await?;
+    jsonschema::blocking::validate(&instance, &schema)?;
+    // One-off iteration over errors
+    for error in jsonschema::iter_errors(&instance, &schema).await? {
+        println!("{}", error);
+    }
+    for error in jsonschema::blocking::iter_errors(&instance, &schema)? {
+        println!("{}", error);
+    }
+    // One-off collecting validation results into a struct conforming to the JSON Schema "Verbose" output format 
+    let verbose = jsonschema::collect_output(&instance, &schema, format::Verbose);
+    // Serialize validation output to JSON (requires the `serde` feature)
+    let serialized = serde_json::to_string(&verbose)?;
+    // One-off iteration over validation results
+    for unit in jsonschema::iter_output_units(&instance, &schema, format::Verbose) {
+        println!("{:?}", unit);
+    }
 
-// Boolean result
-validator.is_valid(&json!(5));
+    // TODO: Maybe keep only specific validators?
+    // Async by default, autodetect draft, defaults to latest
+    let validator = jsonschema::Validator::from_schema(&schema).await?;
+    let validator = jsonschema::blocking::Validator::from_schema(&schema)?;
+    // Specific draft
+    let validator = jsonschema::Draft4Validator::from_schema(&schema).await?;
+    let validator = jsonschema::blocking::Draft4Validator::from_schema(&schema)?;
 
-// Lazy result
-let instance = json!("abc");
-let result = validator.validate(&instance);
+    // Boolean result
+    assert!(!validator.is_valid(&instance));
+    // First error as `Result<(), jsonschema::Error>`
+    assert!(validator.validate(&instance).is_err());
 
-// Boolean result from the lazy one
-result.is_valid();
+    // Iterate over errors
+    for error in validator.iter_errors(&instance) {
+        println!("{}", error);
+    }
 
-// Error iterator
-for error in result.errors() {
-    println!("{}", error);
+    // Result formatting with different styles
+    let verbose = validator.collect_output(&instance, format::Verbose);
+    // Serialize validation output to JSON according to the verbose output format
+    let serialized = serde_json::to_string(&verbose)?;
+
+    // Configuration
+    let validator = jsonschema::Validator::options()
+        // I.e. a resolver that forbids references
+        .with_resolver(MyResolver::new())
+        // Custom validator for the "format" keyword
+        .with_format("card_number", CardNumberFormat::new())
+        // Completely custom behavior for the `my-keyword` keyword
+        .with_keyword("my-keyword", CustomKeywordValidator::new(42))
+        .build(&schema)
+        // .build_blocking(&schema)
+        .await?;
 }
-
-// Result formatting with different styles (`serde` feature)
-let verbose: serde_json::Value = result.format().verbose();
-let basic: serde_yaml::Value = result.format().basic();
-let custom: serde_json::Value = result.format().with(MyCustomFormatter);
-
-// Validator for a specific draft (`draft4` feature)
-let validator = draft4::validator!({"type": "integer"}).await?;
-
-// Non-macro
-let schema = json!({"type": "integer"});
-let validator = Validator::from_schema(&schema).await?;
-let validator = draft4::Validator::from_schema(&schema).await?;
-
-// Blocking ref resolving
-blocking::is_valid(&json!({"type": "integer"}), &json!(5))?;
-let validator = blocking::Validator::from_schema(&schema)?;
-let validator = blocking::draft4::Validator::from_schema(&schema)?;
-
-// Configuration
-let validator = Validator::options()
-    // I.e. a resolver that forbids references
-    .with_resolver(MyResolver::new())
-    // Custom validator for the "format" keyword
-    .with_format("card_number", CardNumberFormat::new())
-    // Completely custom behavior for the `my-keyword` keyword
-    .with_keyword("my-keyword", CustomKeywordValidator::new(42))
-    .build(&schema)
-    .await?;
 ```

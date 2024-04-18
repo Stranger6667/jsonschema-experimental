@@ -1,4 +1,3 @@
-use serde::Serializer;
 use crate::ValidationState;
 use jsonlike::Json;
 
@@ -31,8 +30,13 @@ pub struct OutputFormatterState<'s, 'v, 'i, F: OutputFormatter, J: Json> {
 }
 
 #[cfg(feature = "serde")]
-impl<'s, 'v, 'i, F: OutputFormatter, J: Json> serde::Serialize for OutputFormatterState<'s, 'v, 'i, F, J> {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+impl<'s, 'v, 'i, F: OutputFormatter, J: Json> serde::Serialize
+    for OutputFormatterState<'s, 'v, 'i, F, J>
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
         todo!()
     }
 }
@@ -45,13 +49,14 @@ impl<'s, 'v, 'i, F: OutputFormatter, J: Json> OutputFormatterState<'s, 'v, 'i, F
         OutputFormatterState { state, formatter }
     }
     pub fn iter_units(&self) -> OutputUnitIter<F> {
-        OutputUnitIter { formatter: &self.formatter }
+        OutputUnitIter {
+            formatter: &self.formatter,
+        }
     }
 }
 
-
 pub struct OutputUnitIter<'a, F: OutputFormatter> {
-  formatter: &'a F
+    formatter: &'a F,
 }
 
 impl<'a, F: OutputFormatter> Iterator for OutputUnitIter<'a, F> {
@@ -62,6 +67,4 @@ impl<'a, F: OutputFormatter> Iterator for OutputUnitIter<'a, F> {
     }
 }
 
-pub struct OutputUnit {
-
-}
+pub struct OutputUnit {}

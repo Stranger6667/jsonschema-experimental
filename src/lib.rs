@@ -13,7 +13,7 @@
 //! ```
 //!
 //! ```rust
-//! use jsonschema::output;
+//! use jsonschema::format;
 //!
 //! #[cfg(feature = "serde_json")]
 //! async fn test() -> Result<(), jsonschema::Error> {
@@ -23,17 +23,16 @@
 //!     let instance = json!("a");
 //!     let validator = jsonschema::Validator::from_schema(&schema).await?;
 //!     assert!(!validator.is_valid(&instance));
-//!     let state = validator.validate(&instance);
-//!     assert!(!state.is_valid());
-//!     for error in state.iter_errors() {
+//!     assert!(validator.validate(&instance).is_err());
+//!     for error in validator.iter_errors(&instance) {
 //!
 //!     }
-//!     let verbose = state.format_with(output::Verbose);
+//!     let verbose = validator.collect_output(&instance, format::Verbose);
 //!     let v = serde_json::to_string(&verbose).unwrap();
-//!     for unit in verbose.iter_units() {
+//!     for unit in validator.iter_output_units(&instance, format::Verbose) {
 //!
 //!     }
-//!     for error in jsonschema::validate(&instance, &schema).await?.iter_errors() {
+//!     for error in jsonschema::iter_errors(&instance, &schema).await? {
 //!
 //!     }
 //!     Ok(())
@@ -42,7 +41,7 @@
 mod compiler;
 mod drafts;
 mod error;
-pub mod output;
+pub mod format;
 mod validation;
 
 pub use crate::{
