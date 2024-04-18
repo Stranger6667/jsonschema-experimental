@@ -1,10 +1,8 @@
 use std::marker::PhantomData;
 
 use jsonlike::Json;
-pub mod formats;
 mod iter;
 mod state;
-pub use formats::OutputFormatState;
 pub use iter::ValidationErrorIter;
 mod validator;
 use crate::{

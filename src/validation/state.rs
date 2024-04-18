@@ -1,8 +1,10 @@
 use std::borrow::Cow;
 
+use crate::{
+    output::{OutputFormatter, OutputFormatterState},
+    validation::{JsonSchemaValidator, ValidationErrorIter},
+};
 use jsonlike::Json;
-
-use super::{JsonSchemaValidator, OutputFormatState, ValidationErrorIter};
 
 pub struct ValidationState<'v, 'i, J> {
     validator: Cow<'v, JsonSchemaValidator>,
@@ -22,10 +24,13 @@ impl<'v, 'i, J: Json> ValidationState<'v, 'i, J> {
     pub fn is_valid(&self) -> bool {
         self.validator.is_valid(self.instance)
     }
-    pub fn errors<'s>(&'s self) -> ValidationErrorIter<'v, 'i, 's, J> {
+    pub fn iter_errors<'s>(&'s self) -> ValidationErrorIter<'v, 'i, 's, J> {
         ValidationErrorIter::new(self)
     }
-    pub fn format<'s>(&'s self) -> OutputFormatState<'v, 'i, 's, J> {
-        OutputFormatState::new(self)
+    pub fn format_with<'s, F: OutputFormatter>(
+        &'s self,
+        formatter: F,
+    ) -> OutputFormatterState<'s, 'v, 'i, F, J> {
+        OutputFormatterState::new(self, formatter)
     }
 }

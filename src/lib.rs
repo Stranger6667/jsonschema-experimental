@@ -13,35 +13,7 @@
 //! ```
 //!
 //! ```rust
-//! use jsonlike::Json;
-//! use jsonschema::{formats::OutputFormatter, ValidationState};
-//!
-//! struct MyFormatter;
-//!
-//! #[derive(Debug)]
-//! enum MyError {}
-//!
-//! impl std::fmt::Display for MyError {
-//!     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//!         Ok(())
-//!     }
-//! }
-//!
-//! impl std::error::Error for MyError {}
-//!
-//! struct CustomOutput {}
-//!
-//! impl OutputFormatter for MyFormatter {
-//!     type Error = MyError;
-//!     type Output = CustomOutput;
-//!
-//!    fn try_format<J: Json>(
-//!        &self,
-//!        state: &ValidationState<J>,
-//!    ) -> Result<Self::Output, Self::Error> {
-//!        Ok(CustomOutput {})
-//!    }
-//! }
+//! use jsonschema::output;
 //!
 //! #[cfg(feature = "serde_json")]
 //! async fn test() -> Result<(), jsonschema::Error> {
@@ -53,13 +25,15 @@
 //!     assert!(!validator.is_valid(&instance));
 //!     let state = validator.validate(&instance);
 //!     assert!(!state.is_valid());
-//!     for error in state.errors() {
+//!     for error in state.iter_errors() {
 //!
 //!     }
-//!     let verbose = state.format().verbose();
+//!     let verbose = state.format_with(output::Verbose);
 //!     let v = serde_json::to_string(&verbose).unwrap();
-//!     let custom = state.format().with(MyFormatter);
-//!     for error in jsonschema::validate(&instance, &schema).await?.errors() {
+//!     for unit in verbose.iter_units() {
+//!
+//!     }
+//!     for error in jsonschema::validate(&instance, &schema).await?.iter_errors() {
 //!
 //!     }
 //!     Ok(())
@@ -68,12 +42,13 @@
 mod compiler;
 mod drafts;
 mod error;
+pub mod output;
 mod validation;
 
 pub use crate::{
     drafts::{draft04, Draft},
     error::{Error, SchemaError, ValidationError},
-    validation::{formats, is_valid, validate, JsonSchemaValidator, ValidationState},
+    validation::{is_valid, validate, JsonSchemaValidator, ValidationState},
 };
 use drafts::{draft04::Draft04, Autodetect};
 
