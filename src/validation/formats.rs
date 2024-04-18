@@ -17,7 +17,7 @@ impl<'v, 'i, 's, J: Json> OutputFormatState<'v, 'i, 's, J> {
         todo!()
     }
     pub fn with<F: OutputFormatter>(&self, formatter: F) -> F::Output {
-        formatter.format::<J>(self)
+        formatter.format::<J>(self.state)
     }
 }
 
@@ -30,10 +30,10 @@ pub trait OutputFormatter {
 
     fn try_format<J: Json>(
         &self,
-        state: &OutputFormatState<J>,
+        state: &ValidationState<J>,
     ) -> Result<Self::Output, Self::Error>;
 
-    fn format<J: Json>(&self, state: &OutputFormatState<J>) -> Self::Output {
+    fn format<J: Json>(&self, state: &ValidationState<J>) -> Self::Output {
         self.try_format::<J>(state).expect("Failed to format")
     }
 }

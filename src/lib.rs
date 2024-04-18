@@ -14,7 +14,7 @@
 //!
 //! ```rust
 //! use jsonlike::Json;
-//! use jsonschema::formats::{OutputFormatter, OutputFormatState};
+//! use jsonschema::{formats::OutputFormatter, ValidationState};
 //!
 //! struct MyFormatter;
 //!
@@ -37,7 +37,7 @@
 //!
 //!    fn try_format<J: Json>(
 //!        &self,
-//!        state: &OutputFormatState<J>,
+//!        state: &ValidationState<J>,
 //!    ) -> Result<Self::Output, Self::Error> {
 //!        Ok(CustomOutput {})
 //!    }
@@ -73,7 +73,7 @@ mod validation;
 pub use crate::{
     drafts::{draft04, Draft},
     error::{Error, SchemaError, ValidationError},
-    validation::{formats, is_valid, validate, JsonSchemaValidator},
+    validation::{formats, is_valid, validate, JsonSchemaValidator, ValidationState},
 };
 use drafts::{draft04::Draft04, Autodetect};
 
