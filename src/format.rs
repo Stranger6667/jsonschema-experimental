@@ -1,6 +1,5 @@
 use crate::{Error, JsonSchemaValidator};
 use jsonlike::Json;
-use std::borrow::Cow;
 
 pub trait OutputFormatter: Clone {
     type Output;
@@ -10,22 +9,6 @@ pub trait OutputFormatter: Clone {
         validator: &JsonSchemaValidator,
         instance: &J,
     ) -> Result<Self::Output, Error>;
-
-    fn iter<'v, 'i, J: Json>(
-        self,
-        validator: &'v JsonSchemaValidator,
-        instance: &'i J,
-    ) -> OutputUnitIter<'v, 'static, 'i, Self, J> {
-        OutputUnitIter::new(Cow::Borrowed(validator), Cow::Owned(self), instance)
-    }
-
-    fn into_iter<J: Json>(
-        self,
-        validator: JsonSchemaValidator,
-        instance: &J,
-    ) -> OutputUnitIter<'static, 'static, '_, Self, J> {
-        OutputUnitIter::new(Cow::Owned(validator), Cow::Owned(self), instance)
-    }
 }
 
 #[derive(Clone)]
@@ -103,33 +86,26 @@ impl OutputFormatter for Verbose {
     }
 }
 
-pub struct OutputUnitIter<'v, 'f, 'i, F: OutputFormatter, J: Json> {
-    validator: Cow<'v, JsonSchemaValidator>,
-    formatter: Cow<'f, F>,
-    instance: &'i J,
-}
-
-impl<'v, 'f, 'i, F: OutputFormatter, J: Json> OutputUnitIter<'v, 'f, 'i, F, J> {
-    pub(crate) fn new(
-        validator: Cow<'v, JsonSchemaValidator>,
-        formatter: Cow<'f, F>,
-        instance: &'i J,
-    ) -> OutputUnitIter<'v, 'f, 'i, F, J> {
-        OutputUnitIter {
-            validator,
-            formatter,
-            instance,
-        }
-    }
-}
-
-impl<'v, 'f, 'i, F: OutputFormatter, J: Json> Iterator for OutputUnitIter<'v, 'f, 'i, F, J> {
-    type Item = OutputUnit;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        todo!()
-    }
-}
-
 #[derive(Debug)]
-pub struct OutputUnit {}
+pub enum OutputUnit {
+    Valid {
+        keyword_location: String,
+        absolute_keyword_location: Option<String>,
+        instance_location: String,
+        annotations: Vec<OutputUnit>,
+    },
+    SingleError {
+        keyword_location: String,
+        absolute_keyword_location: Option<String>,
+        instance_location: String,
+        error: String,
+        annotations: Vec<OutputUnit>,
+    },
+    MultipleErrors {
+        keyword_location: String,
+        absolute_keyword_location: Option<String>,
+        instance_location: String,
+        errors: Vec<OutputUnit>,
+        annotations: Vec<OutputUnit>,
+    },
+}

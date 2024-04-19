@@ -32,10 +32,6 @@
 //!     {
 //!         let serialized = serde_json::to_string(&verbose).unwrap();
 //!     }
-//!     // One-off iteration over validation results
-//!     for unit in jsonschema::iter_output_units(&instance, &schema, format::Verbose).await? {
-//!         println!("{:?}", unit);
-//!     }
 //!
 //!     // Async by default, autodetect draft based on the `$schema` property
 //!     let validator = jsonschema::validator_for(&schema).await?;
@@ -61,10 +57,6 @@
 //!     {
 //!         let serialized = serde_json::to_string(&verbose).unwrap();
 //!     }
-//!     // Iteration over validation results
-//!     for unit in validator.iter_output_units(&instance, format::Verbose) {
-//!         println!("{:?}", unit);
-//!     }
 //!     Ok(())
 //! }
 //! ```
@@ -78,8 +70,8 @@ pub use crate::{
     drafts::{draft04, Draft},
     error::{Error, SchemaError, ValidationError},
     validation::{
-        blocking, collect_output, is_valid, iter_errors, iter_output_units, validate,
-        validator_for, JsonSchemaValidator,
+        blocking, collect_output, is_valid, iter_errors, validate, validator_for,
+        JsonSchemaValidator,
     },
 };
 use drafts::{draft04::Draft04, Autodetect};

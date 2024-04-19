@@ -8,7 +8,7 @@ use crate::{
     compiler,
     drafts::Autodetect,
     error::{Error, SchemaError},
-    format::{OutputFormatter, OutputUnitIter},
+    format::OutputFormatter,
     Draft,
 };
 pub use validator::JsonSchemaValidator;
@@ -41,15 +41,6 @@ pub async fn collect_output<F: OutputFormatter, J: Json>(
 ) -> Result<F::Output, Error> {
     let validator = validator_for(schema).await?;
     formatter.format(&validator, instance)
-}
-
-pub async fn iter_output_units<'i, F: OutputFormatter, J: Json>(
-    instance: &'i J,
-    schema: &J,
-    formatter: F,
-) -> Result<OutputUnitIter<'static, 'static, 'i, F, J>, Error> {
-    let validator = validator_for(schema).await?;
-    Ok(formatter.into_iter(validator, instance))
 }
 
 pub struct Validator<D: Draft = Autodetect> {
@@ -91,13 +82,9 @@ impl<D: Draft> ValidatorBuilder<D> {
 
 pub mod blocking {
     use crate::{
-        compiler,
-        draft04::Draft04,
-        drafts::Autodetect,
-        error::SchemaError,
-        format::{OutputFormatter, OutputUnitIter},
-        validation::ValidationErrorIter,
-        Draft, Error, JsonSchemaValidator,
+        compiler, draft04::Draft04, drafts::Autodetect, error::SchemaError,
+        format::OutputFormatter, validation::ValidationErrorIter, Draft, Error,
+        JsonSchemaValidator,
     };
     use jsonlike::Json;
     use std::marker::PhantomData;
@@ -170,14 +157,5 @@ pub mod blocking {
     ) -> Result<F::Output, Error> {
         let validator = validator_for(schema)?;
         formatter.format(&validator, instance)
-    }
-
-    pub fn iter_output_units<'i, F: OutputFormatter, J: Json>(
-        instance: &'i J,
-        schema: &J,
-        formatter: F,
-    ) -> Result<OutputUnitIter<'static, 'static, 'i, F, J>, Error> {
-        let validator = validator_for(schema)?;
-        Ok(formatter.into_iter(validator, instance))
     }
 }
