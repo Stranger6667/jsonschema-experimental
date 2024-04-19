@@ -24,7 +24,10 @@ impl JsonSchemaValidator {
     ) -> ValidationErrorIter<'v, 'i, J> {
         ValidationErrorIter::new(Cow::Borrowed(self), instance)
     }
-    pub fn iter_errors_once<J: Json>(self, instance: &J) -> ValidationErrorIter<'static, '_, J> {
+    pub(crate) fn iter_errors_once<J: Json>(
+        self,
+        instance: &J,
+    ) -> ValidationErrorIter<'static, '_, J> {
         ValidationErrorIter::new(Cow::Owned(self), instance)
     }
     pub fn collect_output<F: OutputFormatter, J: Json>(

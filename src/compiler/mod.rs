@@ -1,7 +1,10 @@
-use crate::{Draft, JsonSchemaValidator, SchemaError};
+use crate::{drafts::Draft, Error, JsonSchemaValidator};
 use jsonlike::{Json, JsonObject};
 
-pub fn compile<J: Json, D: Draft>(schema: &J) -> Result<JsonSchemaValidator, SchemaError> {
+pub(crate) fn compile<J: Json>(
+    schema: &J,
+    draft: Box<dyn Draft>,
+) -> Result<JsonSchemaValidator, Error> {
     let mut nodes = Vec::new();
     if let Some(obj) = schema.as_object() {
         for (key, value) in obj.iter() {

@@ -30,13 +30,13 @@ async fn test() -> Result<(), jsonschema::Error> {
     for error in jsonschema::blocking::iter_errors(&instance, &schema)? {
         println!("{}", error);
     }
-    // One-off collecting validation results into a struct conforming to the JSON Schema "Verbose" output format 
-    let verbose = jsonschema::collect_output(&instance, &schema, format::Verbose);
+    // One-off collecting validation results into a struct conforming to the JSON Schema "Verbose" output format
+    let verbose = jsonschema::collect_output(&instance, &schema, format::Verbose).await?;
+    let verbose = jsonschema::blocking::collect_output(&instance, &schema, format::Verbose)?;
     // Serialize validation output to JSON (requires the `serde` feature)
-    let serialized = serde_json::to_string(&verbose)?;
-    // One-off iteration over validation results
-    for unit in jsonschema::iter_output_units(&instance, &schema, format::Verbose) {
-        println!("{:?}", unit);
+    #[cfg(feature = "serde")]
+    {
+        let serialized = serde_json::to_string(&verbose).unwrap();
     }
 
     // Async by default, autodetect draft based on the `$schema` property
@@ -57,12 +57,11 @@ async fn test() -> Result<(), jsonschema::Error> {
     }
 
     // Collecting validation results into a struct conforming to the JSON Schema "Verbose" output format
-    let verbose = validator.collect_output(&instance, format::Verbose);
-    // Serialize validation output to JSON according to the verbose output format
-    let serialized = serde_json::to_string(&verbose)?;
-    // Iteration over validation results
-    for unit in validator.iter_output_units(&instance, format::Verbose) {
-        println!("{:?}", unit);
+    let verbose = validator.collect_output(&instance, format::Verbose)?;
+    // Serialize validation output to JSON (requires the `serde` feature)   
+    #[cfg(feature = "serde")]
+    {
+        let serialized = serde_json::to_string(&verbose).unwrap();
     }
 
     // Configuration
@@ -74,7 +73,6 @@ async fn test() -> Result<(), jsonschema::Error> {
         // Completely custom behavior for the `my-keyword` keyword
         .with_keyword("my-keyword", CustomKeywordValidator::new(42))
         .build(&schema)
-        // .build_blocking(&schema)
         .await?;
 }
 ```

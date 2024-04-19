@@ -1,7 +1,7 @@
 use crate::{Error, JsonSchemaValidator};
 use jsonlike::Json;
 
-pub trait OutputFormatter: Clone {
+pub trait OutputFormatter {
     type Output;
 
     fn format<J: Json>(
@@ -11,11 +11,10 @@ pub trait OutputFormatter: Clone {
     ) -> Result<Self::Output, Error>;
 }
 
-#[derive(Clone)]
 pub struct Flag;
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct FlagOutput {
-    valid: bool,
+    pub valid: bool,
 }
 
 impl OutputFormatter for Flag {
@@ -32,7 +31,6 @@ impl OutputFormatter for Flag {
     }
 }
 
-#[derive(Clone)]
 pub struct Basic;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
@@ -50,7 +48,6 @@ impl OutputFormatter for Basic {
     }
 }
 
-#[derive(Clone)]
 pub struct Detailed;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
@@ -68,7 +65,6 @@ impl OutputFormatter for Detailed {
     }
 }
 
-#[derive(Clone)]
 pub struct Verbose;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]

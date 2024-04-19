@@ -1,7 +1,16 @@
-pub mod draft04;
+mod draft04;
+mod draft07;
+pub use draft04::Draft04;
+pub use draft07::Draft07;
 
-pub trait Draft {}
+pub type Latest = Draft04;
 
-pub struct Autodetect;
+pub trait Draft {
+    fn new_boxed() -> Box<dyn Draft>
+    where
+        Self: Sized;
+}
 
-impl Draft for Autodetect {}
+pub(crate) fn from_url(url: &str) -> Option<Box<dyn Draft>> {
+    todo!()
+}

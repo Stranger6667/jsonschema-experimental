@@ -22,12 +22,8 @@
 //!     }
 //!     // One-off collecting validation results into a struct conforming to the JSON Schema "Verbose" output format
 //!     let verbose = jsonschema::collect_output(&instance, &schema, format::Verbose).await?;
-//!     // Serialize validation output to JSON (requires the `serde` feature)
-//!     #[cfg(feature = "serde")]
-//!     {
-//!         let serialized = serde_json::to_string(&verbose).unwrap();
-//!     }
 //!     let verbose = jsonschema::blocking::collect_output(&instance, &schema, format::Verbose)?;
+//!     // Serialize validation output to JSON (requires the `serde` feature)
 //!     #[cfg(feature = "serde")]
 //!     {
 //!         let serialized = serde_json::to_string(&verbose).unwrap();
@@ -67,19 +63,30 @@ pub mod format;
 mod validation;
 
 pub use crate::{
-    drafts::{draft04, Draft},
     error::{Error, SchemaError, ValidationError},
     validation::{
-        blocking, collect_output, is_valid, iter_errors, validate, validator_for,
-        JsonSchemaValidator,
+        collect_output, is_valid, iter_errors, validate, validator_for, JsonSchemaValidator,
     },
 };
-use drafts::{draft04::Draft04, Autodetect};
+use drafts::{Draft04, Draft07};
 
-pub type Draft4Validator = validation::Validator<Draft04>;
-pub type Validator = validation::Validator<Autodetect>;
+pub type Draft4Validator = validation::ValidatorBuilder<Draft04>;
+pub type Draft7Validator = validation::ValidatorBuilder<Draft07>;
 
-#[cfg(all(test, feature = "serde"))]
+pub mod blocking {
+    use crate::{
+        drafts::{Draft04, Draft07},
+        validation,
+    };
+    pub use validation::blocking::{
+        collect_output, is_valid, iter_errors, validate, validator_for,
+    };
+
+    pub type Draft4Validator = validation::blocking::ValidatorBuilder<Draft04>;
+    pub type Draft7Validator = validation::blocking::ValidatorBuilder<Draft07>;
+}
+
+#[cfg(all(test, feature = "serde_json"))]
 mod tests {
     use super::*;
     use serde_json::json;
