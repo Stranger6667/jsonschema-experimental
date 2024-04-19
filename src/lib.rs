@@ -65,7 +65,8 @@ mod validation;
 pub use crate::{
     error::{Error, SchemaError, ValidationError},
     validation::{
-        validate_with_output_format, is_valid, iter_errors, validate, validator_for, JsonSchemaValidator,
+        is_valid, iter_errors, validate, validate_with_output_format, validator_for,
+        JsonSchemaValidator,
     },
 };
 use drafts::{Draft04, Draft07};
@@ -79,7 +80,7 @@ pub mod blocking {
         validation,
     };
     pub use validation::blocking::{
-        validate_with_output_format, is_valid, iter_errors, validate, validator_for,
+        is_valid, iter_errors, validate, validate_with_output_format, validator_for,
     };
 
     pub type Draft4Validator = validation::blocking::ValidatorBuilder<Draft04>;

@@ -34,7 +34,7 @@ pub async fn validate_with_output_format<F: OutputFormat, J: Json>(
     format: F,
 ) -> Result<F::Output, Error> {
     let validator = validator_for(schema).await?;
-    format.format(&validator, instance)
+    format.validate_with_output_format(&validator, instance)
 }
 
 pub struct ValidatorBuilder<D: Draft> {
@@ -139,9 +139,9 @@ pub mod blocking {
     pub fn validate_with_output_format<F: OutputFormat, J: Json>(
         instance: &J,
         schema: &J,
-        formatter: F,
+        format: F,
     ) -> Result<F::Output, Error> {
         let validator = validator_for(schema)?;
-        formatter.format(&validator, instance)
+        format.validate_with_output_format(&validator, instance)
     }
 }

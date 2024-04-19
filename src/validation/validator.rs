@@ -16,7 +16,10 @@ impl JsonSchemaValidator {
         true
     }
     pub fn validate<J: Json>(&self, instance: &J) -> Result<(), Error> {
-        Ok(())
+        match self.iter_errors(instance).next() {
+            None => Ok(()),
+            Some(error) => Err(error.into()),
+        }
     }
     pub fn iter_errors<'v, 'i, J: Json>(
         &'v self,
@@ -33,9 +36,9 @@ impl JsonSchemaValidator {
     pub fn validate_with_output_format<F: OutputFormat, J: Json>(
         &self,
         instance: &J,
-        formatter: F,
+        format: F,
     ) -> Result<F::Output, Error> {
-        formatter.format(self, instance)
+        format.validate_with_output_format(self, instance)
     }
 }
 

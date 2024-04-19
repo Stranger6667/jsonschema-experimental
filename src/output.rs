@@ -4,7 +4,7 @@ use jsonlike::Json;
 pub trait OutputFormat {
     type Output;
 
-    fn format<J: Json>(
+    fn validate_with_output_format<J: Json>(
         &self,
         validator: &JsonSchemaValidator,
         instance: &J,
@@ -20,7 +20,7 @@ pub struct FlagOutput {
 impl OutputFormat for Flag {
     type Output = FlagOutput;
 
-    fn format<J: Json>(
+    fn validate_with_output_format<J: Json>(
         &self,
         validator: &JsonSchemaValidator,
         instance: &J,
@@ -34,12 +34,12 @@ impl OutputFormat for Flag {
 pub struct Basic;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct BasicOutput {}
+pub struct BasicOutput(OutputUnit);
 
 impl OutputFormat for Basic {
     type Output = BasicOutput;
 
-    fn format<J: Json>(
+    fn validate_with_output_format<J: Json>(
         &self,
         validator: &JsonSchemaValidator,
         instance: &J,
@@ -51,12 +51,12 @@ impl OutputFormat for Basic {
 pub struct Detailed;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct DetailedOutput {}
+pub struct DetailedOutput(OutputUnit);
 
 impl OutputFormat for Detailed {
     type Output = DetailedOutput;
 
-    fn format<J: Json>(
+    fn validate_with_output_format<J: Json>(
         &self,
         validator: &JsonSchemaValidator,
         instance: &J,
@@ -68,12 +68,12 @@ impl OutputFormat for Detailed {
 pub struct Verbose;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct VerboseOutput {}
+pub struct VerboseOutput(OutputUnit);
 
 impl OutputFormat for Verbose {
     type Output = VerboseOutput;
 
-    fn format<J: Json>(
+    fn validate_with_output_format<J: Json>(
         &self,
         validator: &JsonSchemaValidator,
         instance: &J,
@@ -82,6 +82,8 @@ impl OutputFormat for Verbose {
     }
 }
 
+// TODO: custom `Serialize` to match the spec
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Debug)]
 pub enum OutputUnit {
     Valid {
