@@ -4,7 +4,7 @@ use jsonlike::Json;
 mod iter;
 pub use iter::ValidationErrorIter;
 mod validator;
-use crate::{compiler, drafts, drafts::Draft, error::Error, format::OutputFormatter};
+use crate::{compiler, drafts, drafts::Draft, error::Error, output::OutputFormatter};
 pub use validator::JsonSchemaValidator;
 
 pub async fn is_valid<J: Json>(schema: &J, instance: &J) -> Result<bool, Error> {
@@ -74,7 +74,7 @@ impl ValidatorBuilderOptions {
 
 pub mod blocking {
     use crate::{
-        compiler, drafts, drafts::Draft, format::OutputFormatter, validation::ValidationErrorIter,
+        compiler, drafts, drafts::Draft, output::OutputFormatter, validation::ValidationErrorIter,
         Error, JsonSchemaValidator,
     };
     use jsonlike::Json;

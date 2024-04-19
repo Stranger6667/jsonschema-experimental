@@ -1,4 +1,4 @@
-use crate::{format::OutputFormatter, validation::ValidationErrorIter, Error};
+use crate::{output::OutputFormatter, validation::ValidationErrorIter, Error};
 use jsonlike::Json;
 use std::borrow::Cow;
 
