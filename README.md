@@ -11,7 +11,7 @@ For an in-depth roadmap, please take a look [here](https://github.com/Stranger66
 This is how library API may look like:
 
 ```rust
-use jsonschema::format;
+use jsonschema::output;
 
 async fn test() -> Result<(), jsonschema::Error> {
     let schema = serde_json::json!({"type": "integer"});
@@ -31,8 +31,8 @@ async fn test() -> Result<(), jsonschema::Error> {
         println!("{}", error);
     }
     // One-off collecting validation results into a struct conforming to the JSON Schema "Verbose" output format
-    let verbose = jsonschema::collect_output(&instance, &schema, format::Verbose).await?;
-    let verbose = jsonschema::blocking::collect_output(&instance, &schema, format::Verbose)?;
+    let verbose = jsonschema::validate_with_output_format(&instance, &schema, output::Verbose).await?;
+    let verbose = jsonschema::blocking::validate_with_output_format(&instance, &schema, output::Verbose)?;
     // Serialize validation output to JSON (requires the `serde` feature)
     #[cfg(feature = "serde")]
     {
@@ -57,7 +57,7 @@ async fn test() -> Result<(), jsonschema::Error> {
     }
 
     // Collecting validation results into a struct conforming to the JSON Schema "Verbose" output format
-    let verbose = validator.collect_output(&instance, format::Verbose)?;
+    let verbose = validator.validate_with_output_format(&instance, output::Verbose)?;
     // Serialize validation output to JSON (requires the `serde` feature)   
     #[cfg(feature = "serde")]
     {

@@ -1,4 +1,4 @@
-use crate::{output::OutputFormatter, validation::ValidationErrorIter, Error};
+use crate::{output::OutputFormat, validation::ValidationErrorIter, Error};
 use jsonlike::Json;
 use std::borrow::Cow;
 
@@ -30,7 +30,7 @@ impl JsonSchemaValidator {
     ) -> ValidationErrorIter<'static, '_, J> {
         ValidationErrorIter::new(Cow::Owned(self), instance)
     }
-    pub fn collect_output<F: OutputFormatter, J: Json>(
+    pub fn validate_with_output_format<F: OutputFormat, J: Json>(
         &self,
         instance: &J,
         formatter: F,

@@ -4,7 +4,7 @@ use jsonlike::Json;
 mod iter;
 pub use iter::ValidationErrorIter;
 mod validator;
-use crate::{compiler, drafts, drafts::Draft, error::Error, output::OutputFormatter};
+use crate::{compiler, drafts, drafts::Draft, error::Error, output::OutputFormat};
 pub use validator::JsonSchemaValidator;
 
 pub async fn is_valid<J: Json>(schema: &J, instance: &J) -> Result<bool, Error> {
@@ -28,13 +28,13 @@ pub async fn validator_for<J: Json>(schema: &J) -> Result<JsonSchemaValidator, E
     ValidatorBuilderOptions::new(draft).build(schema).await
 }
 
-pub async fn collect_output<F: OutputFormatter, J: Json>(
+pub async fn validate_with_output_format<F: OutputFormat, J: Json>(
     instance: &J,
     schema: &J,
-    formatter: F,
+    format: F,
 ) -> Result<F::Output, Error> {
     let validator = validator_for(schema).await?;
-    formatter.format(&validator, instance)
+    format.format(&validator, instance)
 }
 
 pub struct ValidatorBuilder<D: Draft> {
@@ -74,7 +74,7 @@ impl ValidatorBuilderOptions {
 
 pub mod blocking {
     use crate::{
-        compiler, drafts, drafts::Draft, output::OutputFormatter, validation::ValidationErrorIter,
+        compiler, drafts, drafts::Draft, output::OutputFormat, validation::ValidationErrorIter,
         Error, JsonSchemaValidator,
     };
     use jsonlike::Json;
@@ -136,7 +136,7 @@ pub mod blocking {
         ValidatorBuilderOptions::new(draft).build(schema)
     }
 
-    pub fn collect_output<F: OutputFormatter, J: Json>(
+    pub fn validate_with_output_format<F: OutputFormat, J: Json>(
         instance: &J,
         schema: &J,
         formatter: F,
