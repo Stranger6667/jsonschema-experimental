@@ -59,14 +59,15 @@
 mod compiler;
 mod drafts;
 mod error;
+mod graph;
 pub mod output;
 mod validation;
+mod vocabulary;
 
 pub use crate::{
     error::{Error, SchemaError, ValidationError},
     validation::{
-        is_valid, iter_errors, validate, validate_with_output_format, validator_for,
-        JsonSchemaValidator,
+        is_valid, iter_errors, validate, validate_with_output_format, validator_for, Validator,
     },
 };
 use drafts::{Draft04, Draft07};

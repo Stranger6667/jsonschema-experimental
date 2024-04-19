@@ -1,4 +1,4 @@
-use crate::{Error, JsonSchemaValidator};
+use crate::{Error, Validator};
 use jsonlike::Json;
 
 pub trait OutputFormat {
@@ -6,7 +6,7 @@ pub trait OutputFormat {
 
     fn validate_with_output_format<J: Json>(
         &self,
-        validator: &JsonSchemaValidator,
+        validator: &Validator,
         instance: &J,
     ) -> Result<Self::Output, Error>;
 }
@@ -22,7 +22,7 @@ impl OutputFormat for Flag {
 
     fn validate_with_output_format<J: Json>(
         &self,
-        validator: &JsonSchemaValidator,
+        validator: &Validator,
         instance: &J,
     ) -> Result<Self::Output, Error> {
         Ok(FlagOutput {
@@ -41,7 +41,7 @@ impl OutputFormat for Basic {
 
     fn validate_with_output_format<J: Json>(
         &self,
-        validator: &JsonSchemaValidator,
+        validator: &Validator,
         instance: &J,
     ) -> Result<Self::Output, Error> {
         todo!()
@@ -58,7 +58,7 @@ impl OutputFormat for Detailed {
 
     fn validate_with_output_format<J: Json>(
         &self,
-        validator: &JsonSchemaValidator,
+        validator: &Validator,
         instance: &J,
     ) -> Result<Self::Output, Error> {
         todo!()
@@ -75,7 +75,7 @@ impl OutputFormat for Verbose {
 
     fn validate_with_output_format<J: Json>(
         &self,
-        validator: &JsonSchemaValidator,
+        validator: &Validator,
         instance: &J,
     ) -> Result<Self::Output, Error> {
         todo!()

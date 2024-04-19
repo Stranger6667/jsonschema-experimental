@@ -5,7 +5,7 @@ mod iter;
 pub use iter::ValidationErrorIter;
 mod validator;
 use crate::{compiler, drafts, drafts::Draft, error::Error, output::OutputFormat};
-pub use validator::JsonSchemaValidator;
+pub use validator::Validator;
 
 pub async fn is_valid<J: Json>(schema: &J, instance: &J) -> Result<bool, Error> {
     Ok(validator_for(schema).await?.is_valid(instance))
@@ -23,7 +23,7 @@ pub async fn iter_errors<'schema, 'instance, J: Json>(
     Ok(validator.iter_errors_once(instance))
 }
 
-pub async fn validator_for<J: Json>(schema: &J) -> Result<JsonSchemaValidator, Error> {
+pub async fn validator_for<J: Json>(schema: &J) -> Result<Validator, Error> {
     let draft = drafts::from_url("TODO").unwrap_or_else(drafts::Latest::new_boxed);
     ValidatorBuilderOptions::new(draft).build(schema).await
 }
@@ -42,7 +42,7 @@ pub struct ValidatorBuilder<D: Draft> {
 }
 
 impl<D: Draft> ValidatorBuilder<D> {
-    pub async fn from_schema<J: Json>(schema: &J) -> Result<JsonSchemaValidator, Error> {
+    pub async fn from_schema<J: Json>(schema: &J) -> Result<Validator, Error> {
         Self::options().build(schema).await
     }
 
@@ -66,7 +66,7 @@ impl ValidatorBuilderOptions {
         Self { draft }
     }
 
-    pub async fn build<J: Json>(self, schema: &J) -> Result<JsonSchemaValidator, Error> {
+    pub async fn build<J: Json>(self, schema: &J) -> Result<Validator, Error> {
         // TODO: Resolve references
         compiler::compile::<J>(schema, self.draft)
     }
@@ -75,7 +75,7 @@ impl ValidatorBuilderOptions {
 pub mod blocking {
     use crate::{
         compiler, drafts, drafts::Draft, output::OutputFormat, validation::ValidationErrorIter,
-        Error, JsonSchemaValidator,
+        Error, Validator,
     };
     use jsonlike::Json;
     use std::marker::PhantomData;
@@ -85,7 +85,7 @@ pub mod blocking {
     }
 
     impl<D: Draft> ValidatorBuilder<D> {
-        pub fn from_schema<J: Json>(schema: &J) -> Result<JsonSchemaValidator, Error> {
+        pub fn from_schema<J: Json>(schema: &J) -> Result<Validator, Error> {
             Self::options().build(schema)
         }
 
@@ -109,7 +109,7 @@ pub mod blocking {
             Self { draft }
         }
 
-        pub fn build<J: Json>(self, schema: &J) -> Result<JsonSchemaValidator, Error> {
+        pub fn build<J: Json>(self, schema: &J) -> Result<Validator, Error> {
             // TODO: Resolve references
             compiler::compile::<J>(schema, self.draft)
         }
@@ -131,7 +131,7 @@ pub mod blocking {
         Ok(validator.iter_errors_once(instance))
     }
 
-    pub fn validator_for<J: Json>(schema: &J) -> Result<JsonSchemaValidator, Error> {
+    pub fn validator_for<J: Json>(schema: &J) -> Result<Validator, Error> {
         let draft = drafts::from_url("TODO").unwrap_or_else(drafts::Latest::new_boxed);
         ValidatorBuilderOptions::new(draft).build(schema)
     }

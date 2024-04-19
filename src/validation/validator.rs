@@ -1,15 +1,17 @@
-use crate::{output::OutputFormat, validation::ValidationErrorIter, Error};
+use crate::{
+    graph, output::OutputFormat, validation::ValidationErrorIter, vocabulary::Keyword, Error,
+};
 use jsonlike::Json;
 use std::borrow::Cow;
 
 #[derive(Debug, Clone)]
-pub struct JsonSchemaValidator {
-    nodes: Vec<JsonSchemaValidatorNode>,
+pub struct Validator {
+    graph: graph::Graph<Keyword>,
 }
 
-impl JsonSchemaValidator {
-    pub(crate) fn new(nodes: Vec<JsonSchemaValidatorNode>) -> Self {
-        Self { nodes }
+impl Validator {
+    pub(crate) fn new(graph: graph::Graph<Keyword>) -> Self {
+        Self { graph }
     }
 
     pub fn is_valid<J: Json>(&self, instance: &J) -> bool {
@@ -41,16 +43,3 @@ impl JsonSchemaValidator {
         format.validate_with_output_format(self, instance)
     }
 }
-
-#[derive(Debug, Clone)]
-pub(crate) struct JsonSchemaValidatorNode {
-    keyword: Keyword,
-}
-
-#[derive(Debug, Clone)]
-enum Keyword {
-    Type(Type),
-}
-
-#[derive(Debug, Clone)]
-struct Type {}
