@@ -6,6 +6,7 @@ pub use iter::ValidationErrorIter;
 mod validator;
 use crate::{compiler, drafts, drafts::Draft, error::Error, output::OutputFormat};
 pub use validator::Validator;
+use crate::drafts::IntoDraft;
 
 pub async fn is_valid<J: Json>(schema: &J, instance: &J) -> Result<bool, Error> {
     Ok(validator_for(schema).await?.is_valid(instance))
@@ -24,7 +25,7 @@ pub async fn iter_errors<'schema, 'instance, J: Json>(
 }
 
 pub async fn validator_for<J: Json>(schema: &J) -> Result<Validator, Error> {
-    let draft = drafts::from_url("TODO").unwrap_or_else(drafts::Latest::new_boxed);
+    let draft = drafts::from_url("TODO").unwrap_or(drafts::LATEST);
     ValidatorBuilderOptions::new(draft).build(schema).await
 }
 
@@ -37,32 +38,32 @@ pub async fn validate_with_output_format<F: OutputFormat, J: Json>(
     format.validate_with_output_format(&validator, instance)
 }
 
-pub struct ValidatorBuilder<D: Draft> {
+pub struct ValidatorBuilder<D: IntoDraft> {
     _phantom: PhantomData<D>,
 }
 
-impl<D: Draft> ValidatorBuilder<D> {
+impl<D: IntoDraft> ValidatorBuilder<D> {
     pub async fn from_schema<J: Json>(schema: &J) -> Result<Validator, Error> {
         Self::options().build(schema).await
     }
 
     pub fn options() -> ValidatorBuilderOptions {
-        ValidatorBuilderOptions::new(D::new_boxed())
+        ValidatorBuilderOptions::new(D::get_draft())
     }
 }
 
 pub struct ValidatorBuilderOptions {
-    draft: Box<dyn Draft>,
+    draft: Draft,
 }
 
 impl Default for ValidatorBuilderOptions {
     fn default() -> Self {
-        Self::new(Box::<drafts::Latest>::default())
+        Self::new(drafts::LATEST)
     }
 }
 
 impl ValidatorBuilderOptions {
-    fn new(draft: Box<dyn Draft>) -> Self {
+    fn new(draft: Draft) -> Self {
         Self { draft }
     }
 
@@ -79,33 +80,34 @@ pub mod blocking {
     };
     use jsonlike::Json;
     use std::marker::PhantomData;
+    use crate::drafts::IntoDraft;
 
-    pub struct ValidatorBuilder<D: Draft> {
+    pub struct ValidatorBuilder<D: IntoDraft> {
         _phantom: PhantomData<D>,
     }
 
-    impl<D: Draft> ValidatorBuilder<D> {
+    impl<D: IntoDraft> ValidatorBuilder<D> {
         pub fn from_schema<J: Json>(schema: &J) -> Result<Validator, Error> {
             Self::options().build(schema)
         }
 
         pub fn options() -> ValidatorBuilderOptions {
-            ValidatorBuilderOptions::new(D::new_boxed())
+            ValidatorBuilderOptions::new(D::get_draft())
         }
     }
 
     pub struct ValidatorBuilderOptions {
-        draft: Box<dyn Draft>,
+        draft: Draft,
     }
 
     impl Default for ValidatorBuilderOptions {
         fn default() -> Self {
-            Self::new(Box::<drafts::Latest>::default())
+            Self::new(drafts::LATEST)
         }
     }
 
     impl ValidatorBuilderOptions {
-        pub(crate) fn new(draft: Box<dyn Draft>) -> Self {
+        pub(crate) fn new(draft: Draft) -> Self {
             Self { draft }
         }
 
@@ -132,7 +134,7 @@ pub mod blocking {
     }
 
     pub fn validator_for<J: Json>(schema: &J) -> Result<Validator, Error> {
-        let draft = drafts::from_url("TODO").unwrap_or_else(drafts::Latest::new_boxed);
+        let draft = drafts::from_url("TODO").unwrap_or(drafts::LATEST);
         ValidatorBuilderOptions::new(draft).build(schema)
     }
 

@@ -3,15 +3,28 @@ mod draft07;
 use crate::vocabulary::Keyword;
 pub use draft04::Draft04;
 pub use draft07::Draft07;
-pub type Latest = Draft04;
+use jsonlike::Json;
 
-pub trait Draft {
-    fn new_boxed() -> Box<dyn Draft>
-    where
-        Self: Sized;
-    fn get_keyword(&self, key: &str) -> Option<Keyword>;
+pub const LATEST: Draft = Draft::Draft04;
+
+pub enum Draft {
+    Draft04,
+    Draft07
 }
 
-pub(crate) fn from_url(url: &str) -> Option<Box<dyn Draft>> {
+pub trait IntoDraft {
+    fn get_draft() -> Draft;
+}
+
+impl Draft {
+    pub(crate) fn get_keyword<J: Json>(&self, key: &str, value: &J) -> Option<Keyword> {
+        match self {
+            Draft::Draft04 => Draft04.get_keyword(key, value),
+            Draft::Draft07 => Draft07.get_keyword(key, value),
+        }
+    }
+}
+
+pub(crate) fn from_url(url: &str) -> Option<Draft> {
     todo!()
 }
