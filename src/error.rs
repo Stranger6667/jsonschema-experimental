@@ -1,3 +1,5 @@
+use std::fmt::{Display, Formatter};
+
 #[derive(Debug)]
 pub enum Error {
     Validation(ValidationError),
@@ -21,5 +23,36 @@ impl From<ValidationError> for Error {
 #[derive(Debug)]
 pub enum ValidationError {}
 
+impl Display for ValidationError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        todo!()
+    }
+}
+
+impl std::error::Error for ValidationError {}
+
 #[derive(Debug)]
 pub enum SchemaError {}
+
+impl Display for SchemaError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        todo!()
+    }
+}
+
+impl std::error::Error for SchemaError {}
+
+impl Display for Error {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        todo!()
+    }
+}
+
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Error::Validation(error) => Some(error),
+            Error::Schema(error) => Some(error),
+        }
+    }
+}

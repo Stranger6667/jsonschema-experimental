@@ -39,10 +39,9 @@ async fn test() -> Result<(), jsonschema::Error> {
         println!("{:?}", unit);
     }
 
-    // TODO: Maybe keep only specific validators?
-    // Async by default, autodetect draft, defaults to latest
-    let validator = jsonschema::Validator::from_schema(&schema).await?;
-    let validator = jsonschema::blocking::Validator::from_schema(&schema)?;
+    // Async by default, autodetect draft based on the `$schema` property
+    let validator = jsonschema::validator_for(&schema).await?;
+    let validator = jsonschema::blocking::validator_for(&schema)?;
     // Specific draft
     let validator = jsonschema::Draft4Validator::from_schema(&schema).await?;
     let validator = jsonschema::blocking::Draft4Validator::from_schema(&schema)?;
@@ -57,10 +56,14 @@ async fn test() -> Result<(), jsonschema::Error> {
         println!("{}", error);
     }
 
-    // Result formatting with different styles
+    // Collecting validation results into a struct conforming to the JSON Schema "Verbose" output format
     let verbose = validator.collect_output(&instance, format::Verbose);
     // Serialize validation output to JSON according to the verbose output format
     let serialized = serde_json::to_string(&verbose)?;
+    // Iteration over validation results
+    for unit in validator.iter_output_units(&instance, format::Verbose) {
+        println!("{:?}", unit);
+    }
 
     // Configuration
     let validator = jsonschema::Validator::options()

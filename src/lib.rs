@@ -1,39 +1,69 @@
-//!  One-off validation:
-//!
-//! ```rust
-//! #[cfg(feature = "serde_json")]
-//! async fn test() -> Result<(), jsonschema::Error> {
-//!     use serde_json::json;
-//!
-//!     let schema = json!({"type": "integer"});
-//!     let instance = json!("a");
-//!     jsonschema::is_valid(&schema, &instance).await?;
-//!     Ok(())
-//! }
-//! ```
 //!
 //! ```rust
 //! use jsonschema::format;
 //!
 //! #[cfg(feature = "serde_json")]
 //! async fn test() -> Result<(), jsonschema::Error> {
-//!     use serde_json::json;
+//!     let schema = serde_json::json!({"type": "integer"});
+//!     let instance = serde_json::json!("a");
 //!
-//!     let schema = json!({"type": "integer"});
-//!     let instance = json!("a");
-//!     let validator = jsonschema::Validator::from_schema(&schema).await?;
-//!     assert!(!validator.is_valid(&instance));
-//!     assert!(validator.validate(&instance).is_err());
-//!     for error in validator.iter_errors(&instance) {
-//!
-//!     }
-//!     let verbose = validator.collect_output(&instance, format::Verbose);
-//!     let v = serde_json::to_string(&verbose).unwrap();
-//!     for unit in validator.iter_output_units(&instance, format::Verbose) {
-//!
-//!     }
+//!     // One-off validation with a boolean result
+//!     jsonschema::is_valid(&instance, &schema).await?;
+//!     jsonschema::blocking::is_valid(&instance, &schema)?;
+//!     // One-off with the first error as `Result<(), jsonschema::Error>`
+//!     jsonschema::validate(&instance, &schema).await?;
+//!     jsonschema::blocking::validate(&instance, &schema)?;
+//!     // One-off iteration over errors
 //!     for error in jsonschema::iter_errors(&instance, &schema).await? {
+//!         println!("{}", error);
+//!     }
+//!     for error in jsonschema::blocking::iter_errors(&instance, &schema)? {
+//!         println!("{}", error);
+//!     }
+//!     // One-off collecting validation results into a struct conforming to the JSON Schema "Verbose" output format
+//!     let verbose = jsonschema::collect_output(&instance, &schema, format::Verbose).await?;
+//!     // Serialize validation output to JSON (requires the `serde` feature)
+//!     #[cfg(feature = "serde")]
+//!     {
+//!         let serialized = serde_json::to_string(&verbose).unwrap();
+//!     }
+//!     let verbose = jsonschema::blocking::collect_output(&instance, &schema, format::Verbose)?;
+//!     #[cfg(feature = "serde")]
+//!     {
+//!         let serialized = serde_json::to_string(&verbose).unwrap();
+//!     }
+//!     // One-off iteration over validation results
+//!     for unit in jsonschema::iter_output_units(&instance, &schema, format::Verbose).await? {
+//!         println!("{:?}", unit);
+//!     }
 //!
+//!     // Async by default, autodetect draft based on the `$schema` property
+//!     let validator = jsonschema::validator_for(&schema).await?;
+//!     let validator = jsonschema::blocking::validator_for(&schema)?;
+//!     // Specific draft
+//!     let validator = jsonschema::Draft4Validator::from_schema(&schema).await?;
+//!     let validator = jsonschema::blocking::Draft4Validator::from_schema(&schema)?;
+//!
+//!     // Boolean result
+//!     assert!(!validator.is_valid(&instance));
+//!     // First error as `Result<(), jsonschema::Error>`
+//!     assert!(validator.validate(&instance).is_err());
+//!
+//!     // Iterate over errors
+//!     for error in validator.iter_errors(&instance) {
+//!         println!("{}", error);
+//!     }
+//!
+//!     // Collecting validation results into a struct conforming to the JSON Schema "Verbose" output format
+//!     let verbose = validator.collect_output(&instance, format::Verbose)?;
+//!     // Serialize validation output to JSON according to the verbose output format
+//!     #[cfg(feature = "serde")]
+//!     {
+//!         let serialized = serde_json::to_string(&verbose).unwrap();
+//!     }
+//!     // Iteration over validation results
+//!     for unit in validator.iter_output_units(&instance, format::Verbose) {
+//!         println!("{:?}", unit);
 //!     }
 //!     Ok(())
 //! }
@@ -47,26 +77,15 @@ mod validation;
 pub use crate::{
     drafts::{draft04, Draft},
     error::{Error, SchemaError, ValidationError},
-    validation::{is_valid, validate, JsonSchemaValidator, ValidationState},
+    validation::{
+        blocking, collect_output, is_valid, iter_errors, iter_output_units, validate,
+        validator_for, JsonSchemaValidator,
+    },
 };
 use drafts::{draft04::Draft04, Autodetect};
 
 pub type Draft4Validator = validation::Validator<Draft04>;
 pub type Validator = validation::Validator<Autodetect>;
-
-pub mod blocking {
-    use jsonlike::Json;
-
-    use crate::{drafts::Draft04, validation, Error};
-
-    pub type Draft4Validator = validation::blocking::Validator<Draft04>;
-    pub type Validator = validation::blocking::Validator;
-
-    pub fn validate<J: Json>(schema: &J, instance: &J) -> Result<(), Error> {
-        let validator = Validator::from_schema(schema)?;
-        todo!()
-    }
-}
 
 #[cfg(all(test, feature = "serde"))]
 mod tests {

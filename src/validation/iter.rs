@@ -1,20 +1,25 @@
+use crate::{JsonSchemaValidator, ValidationError};
 use jsonlike::Json;
+use std::borrow::Cow;
 
-use crate::ValidationError;
-
-use super::ValidationState;
-
-pub struct ValidationErrorIter<'v, 'i, 's, J: Json> {
-    state: &'s ValidationState<'v, 'i, J>,
+pub struct ValidationErrorIter<'validator, 'instance, J: Json> {
+    validator: Cow<'validator, JsonSchemaValidator>,
+    instance: &'instance J,
 }
 
-impl<'v, 'i, 's, J: Json> ValidationErrorIter<'v, 'i, 's, J> {
-    pub(crate) fn new(state: &'s ValidationState<'v, 'i, J>) -> ValidationErrorIter<'v, 'i, 's, J> {
-        ValidationErrorIter { state }
+impl<'validator, 'instance, J: Json> ValidationErrorIter<'validator, 'instance, J> {
+    pub(crate) fn new(
+        validator: Cow<'validator, JsonSchemaValidator>,
+        instance: &'instance J,
+    ) -> ValidationErrorIter<'validator, 'instance, J> {
+        ValidationErrorIter {
+            validator,
+            instance,
+        }
     }
 }
 
-impl<'v, 'i, 's, J: Json> Iterator for ValidationErrorIter<'v, 'i, 's, J> {
+impl<'validator, 'instance, J: Json> Iterator for ValidationErrorIter<'validator, 'instance, J> {
     type Item = ValidationError;
 
     fn next(&mut self) -> Option<Self::Item> {
