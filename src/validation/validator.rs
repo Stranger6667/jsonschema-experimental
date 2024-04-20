@@ -35,11 +35,11 @@ impl Validator {
     ) -> ValidationErrorIter<'static, '_, J> {
         ValidationErrorIter::new(Cow::Owned(self), instance)
     }
-    pub fn validate_with_output_format<F: OutputFormat, J: Json>(
+    pub fn validate_formatted<F: OutputFormat, J: Json>(
         &self,
         instance: &J,
         format: F,
     ) -> Result<F::Output, Error> {
-        format.validate_with_output_format(self, instance)
+        format.validate_formatted(self, instance)
     }
 }

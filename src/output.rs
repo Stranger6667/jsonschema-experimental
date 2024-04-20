@@ -4,7 +4,7 @@ use jsonlike::Json;
 pub trait OutputFormat {
     type Output;
 
-    fn validate_with_output_format<J: Json>(
+    fn validate_formatted<J: Json>(
         &self,
         validator: &Validator,
         instance: &J,
@@ -20,7 +20,7 @@ pub struct FlagOutput {
 impl OutputFormat for Flag {
     type Output = FlagOutput;
 
-    fn validate_with_output_format<J: Json>(
+    fn validate_formatted<J: Json>(
         &self,
         validator: &Validator,
         instance: &J,
@@ -39,7 +39,7 @@ pub struct BasicOutput(OutputUnit);
 impl OutputFormat for Basic {
     type Output = BasicOutput;
 
-    fn validate_with_output_format<J: Json>(
+    fn validate_formatted<J: Json>(
         &self,
         validator: &Validator,
         instance: &J,
@@ -56,7 +56,7 @@ pub struct DetailedOutput(OutputUnit);
 impl OutputFormat for Detailed {
     type Output = DetailedOutput;
 
-    fn validate_with_output_format<J: Json>(
+    fn validate_formatted<J: Json>(
         &self,
         validator: &Validator,
         instance: &J,
@@ -73,7 +73,7 @@ pub struct VerboseOutput(OutputUnit);
 impl OutputFormat for Verbose {
     type Output = VerboseOutput;
 
-    fn validate_with_output_format<J: Json>(
+    fn validate_formatted<J: Json>(
         &self,
         validator: &Validator,
         instance: &J,

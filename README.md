@@ -31,8 +31,8 @@ async fn test() -> Result<(), jsonschema::Error> {
         println!("{}", error);
     }
     // One-off collecting validation results into a struct conforming to the JSON Schema "Verbose" output format
-    let verbose = jsonschema::validate_with_output_format(&instance, &schema, output::Verbose).await?;
-    let verbose = jsonschema::blocking::validate_with_output_format(&instance, &schema, output::Verbose)?;
+    let verbose = jsonschema::validate_formatted(&instance, &schema, output::Verbose).await?;
+    let verbose = jsonschema::blocking::validate_formatted(&instance, &schema, output::Verbose)?;
     // Serialize validation output to JSON (requires the `serde` feature)
     #[cfg(feature = "serde")]
     {
@@ -57,7 +57,7 @@ async fn test() -> Result<(), jsonschema::Error> {
     }
 
     // Collecting validation results into a struct conforming to the JSON Schema "Verbose" output format
-    let verbose = validator.validate_with_output_format(&instance, output::Verbose)?;
+    let verbose = validator.validate_formatted(&instance, output::Verbose)?;
     // Serialize validation output to JSON (requires the `serde` feature)   
     #[cfg(feature = "serde")]
     {

@@ -29,13 +29,13 @@ pub async fn validator_for<J: Json>(schema: &J) -> Result<Validator, Error> {
     ValidatorBuilderOptions::new(draft).build(schema).await
 }
 
-pub async fn validate_with_output_format<F: OutputFormat, J: Json>(
+pub async fn validate_formatted<F: OutputFormat, J: Json>(
     instance: &J,
     schema: &J,
     format: F,
 ) -> Result<F::Output, Error> {
     let validator = validator_for(schema).await?;
-    format.validate_with_output_format(&validator, instance)
+    format.validate_formatted(&validator, instance)
 }
 
 pub struct ValidatorBuilder<D: IntoDraft> {
@@ -138,12 +138,12 @@ pub mod blocking {
         ValidatorBuilderOptions::new(draft).build(schema)
     }
 
-    pub fn validate_with_output_format<F: OutputFormat, J: Json>(
+    pub fn validate_formatted<F: OutputFormat, J: Json>(
         instance: &J,
         schema: &J,
         format: F,
     ) -> Result<F::Output, Error> {
         let validator = validator_for(schema)?;
-        format.validate_with_output_format(&validator, instance)
+        format.validate_formatted(&validator, instance)
     }
 }
