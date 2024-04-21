@@ -9,7 +9,12 @@ use crate::{
 };
 
 pub async fn validator_for<J: Json>(schema: &J) -> Result<Validator, SchemaError> {
-    let draft = if let Some(object) = schema.as_object() {
+    let draft = draft_from_schema(schema);
+    ValidatorBuilderOptions::new(draft).build(schema).await
+}
+
+fn draft_from_schema(schema: &impl Json) -> Draft {
+    if let Some(object) = schema.as_object() {
         if let Some(url) = object.get("$schema").and_then(Json::as_string) {
             drafts::from_url(url.borrow()).unwrap_or(drafts::LATEST)
         } else {
@@ -17,8 +22,7 @@ pub async fn validator_for<J: Json>(schema: &J) -> Result<Validator, SchemaError
         }
     } else {
         drafts::LATEST
-    };
-    ValidatorBuilderOptions::new(draft).build(schema).await
+    }
 }
 
 macro_rules! define_validator {
@@ -62,11 +66,12 @@ impl ValidatorBuilderOptions {
 }
 
 pub mod blocking {
+    use super::draft_from_schema;
     use crate::{compiler, drafts, drafts::Draft, SchemaError, Validator};
     use jsonlike::Json;
 
     pub fn validator_for<J: Json>(schema: &J) -> Result<Validator, SchemaError> {
-        let draft = drafts::from_url("TODO").unwrap_or(drafts::LATEST);
+        let draft = draft_from_schema(schema);
         ValidatorBuilderOptions::new(draft).build(schema)
     }
 
