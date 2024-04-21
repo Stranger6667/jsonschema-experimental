@@ -1,10 +1,8 @@
-use std::marker::PhantomData;
-
 use jsonlike::Json;
 
 use crate::{
     compiler,
-    drafts::{self, Draft, IntoDraft},
+    drafts::{self, Draft},
     SchemaError, Validator,
 };
 
@@ -13,19 +11,24 @@ pub async fn validator_for<J: Json>(schema: &J) -> Result<Validator, SchemaError
     ValidatorBuilderOptions::new(draft).build(schema).await
 }
 
-pub struct ValidatorBuilder<D: IntoDraft> {
-    _phantom: PhantomData<D>,
+macro_rules! define_validator {
+    ($name:ident, $draft:expr) => {
+        pub struct $name;
+        impl $name {
+            pub async fn from_schema<J: jsonlike::Json>(
+                schema: &J,
+            ) -> Result<$crate::Validator, $crate::error::SchemaError> {
+                Self::options().build(schema).await
+            }
+
+            pub fn options() -> $crate::validation::builder::ValidatorBuilderOptions {
+                $crate::validation::builder::ValidatorBuilderOptions::new($draft)
+            }
+        }
+    };
 }
 
-impl<D: IntoDraft> ValidatorBuilder<D> {
-    pub async fn from_schema<J: Json>(schema: &J) -> Result<Validator, SchemaError> {
-        Self::options().build(schema).await
-    }
-
-    pub fn options() -> ValidatorBuilderOptions {
-        ValidatorBuilderOptions::new(D::get_draft())
-    }
-}
+pub(crate) use define_validator;
 
 pub struct ValidatorBuilderOptions {
     draft: Draft,
@@ -49,27 +52,32 @@ impl ValidatorBuilderOptions {
 }
 
 pub mod blocking {
-    use crate::{
-        compiler, drafts,
-        drafts::{Draft, IntoDraft},
-        SchemaError, Validator,
-    };
+    use crate::{compiler, drafts, drafts::Draft, SchemaError, Validator};
     use jsonlike::Json;
-    use std::marker::PhantomData;
 
-    pub struct ValidatorBuilder<D: IntoDraft> {
-        _phantom: PhantomData<D>,
+    pub fn validator_for<J: Json>(schema: &J) -> Result<Validator, SchemaError> {
+        let draft = drafts::from_url("TODO").unwrap_or(drafts::LATEST);
+        ValidatorBuilderOptions::new(draft).build(schema)
     }
 
-    impl<D: IntoDraft> ValidatorBuilder<D> {
-        pub fn from_schema<J: Json>(schema: &J) -> Result<Validator, SchemaError> {
-            Self::options().build(schema)
-        }
+    macro_rules! define_validator {
+        ($name:ident, $draft:expr) => {
+            pub struct $name;
+            impl $name {
+                pub fn from_schema<J: jsonlike::Json>(
+                    schema: &J,
+                ) -> Result<$crate::Validator, $crate::error::SchemaError> {
+                    Self::options().build(schema)
+                }
 
-        pub fn options() -> ValidatorBuilderOptions {
-            ValidatorBuilderOptions::new(D::get_draft())
-        }
+                pub fn options() -> $crate::validation::builder::blocking::ValidatorBuilderOptions {
+                    $crate::validation::builder::blocking::ValidatorBuilderOptions::new($draft)
+                }
+            }
+        };
     }
+
+    pub(crate) use define_validator;
 
     pub struct ValidatorBuilderOptions {
         draft: Draft,
@@ -90,10 +98,5 @@ pub mod blocking {
             // TODO: Resolve references
             compiler::compile::<J>(schema, self.draft)
         }
-    }
-
-    pub fn validator_for<J: Json>(schema: &J) -> Result<Validator, SchemaError> {
-        let draft = drafts::from_url("TODO").unwrap_or(drafts::LATEST);
-        ValidatorBuilderOptions::new(draft).build(schema)
     }
 }

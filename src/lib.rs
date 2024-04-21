@@ -65,32 +65,39 @@ mod validation;
 mod vocabulary;
 
 pub use crate::{
+    drafts::Draft,
     error::{Error, SchemaError, ValidationError},
     validation::{
-        builder::{validator_for, ValidatorBuilder},
+        builder::{validator_for, ValidatorBuilderOptions},
         evaluate, is_valid,
         iter::ValidationErrorIter,
-        iter_errors, try_is_valid, validate,
+        iter_errors, try_evaluate, try_is_valid, try_iter_errors, validate,
         validator::Validator,
     },
 };
-use drafts::{Draft04, Draft07};
+use validation::builder::define_validator;
 
-pub type Draft4Validator = ValidatorBuilder<Draft04>;
-pub type Draft7Validator = ValidatorBuilder<Draft07>;
+define_validator!(Draft4Validator, Draft::Draft04);
+define_validator!(Draft6Validator, Draft::Draft06);
+define_validator!(Draft7Validator, Draft::Draft07);
+define_validator!(Draft201909Validator, Draft::Draft201909);
+define_validator!(Draft202012Validator, Draft::Draft202012);
 
 pub mod blocking {
-    use crate::{
-        drafts::{Draft04, Draft07},
-        validation,
-    };
-    pub use validation::{
-        blocking::{evaluate, is_valid, iter_errors, try_is_valid, validate},
-        builder::blocking::{validator_for, ValidatorBuilder},
+    use crate::drafts::Draft;
+    use crate::validation::builder::blocking::define_validator;
+    pub use crate::validation::{
+        blocking::{
+            evaluate, is_valid, iter_errors, try_evaluate, try_is_valid, try_iter_errors, validate,
+        },
+        builder::blocking::validator_for,
     };
 
-    pub type Draft4Validator = ValidatorBuilder<Draft04>;
-    pub type Draft7Validator = ValidatorBuilder<Draft07>;
+    define_validator!(Draft4Validator, Draft::Draft04);
+    define_validator!(Draft6Validator, Draft::Draft06);
+    define_validator!(Draft7Validator, Draft::Draft07);
+    define_validator!(Draft201909Validator, Draft::Draft201909);
+    define_validator!(Draft202012Validator, Draft::Draft202012);
 }
 
 #[cfg(all(test, feature = "serde_json"))]
