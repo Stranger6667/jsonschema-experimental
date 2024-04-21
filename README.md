@@ -126,7 +126,7 @@ use serde_json::json;
 #[tokio::main]
 async fn main() -> Result<(), jsonschema::Error> {
     // ... omitted for brevity
-    let verbose = jsonschema::validate_formatted(&instance, &schema, output::Verbose).await;
+    let verbose = jsonschema::evaluate(&instance, &schema, output::Verbose).await;
     // Serialize validation output to JSON
     let serialized = serde_json::to_string(&verbose).unwrap();
     Ok(())

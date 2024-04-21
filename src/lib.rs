@@ -21,8 +21,8 @@
 //!         println!("{}", error);
 //!     }
 //!     // One-off collecting validation results into a struct conforming to the JSON Schema "Verbose" output format
-//!     let verbose = jsonschema::validate_formatted(&instance, &schema, output::Verbose).await;
-//!     let verbose = jsonschema::blocking::validate_formatted(&instance, &schema, output::Verbose);
+//!     let verbose = jsonschema::evaluate(&instance, &schema, output::Verbose).await;
+//!     let verbose = jsonschema::blocking::evaluate(&instance, &schema, output::Verbose);
 //!     // Serialize validation output to JSON (requires the `serde` feature)
 //!     #[cfg(feature = "serde")]
 //!     {
@@ -47,7 +47,7 @@
 //!     }
 //!
 //!     // Collecting validation results into a struct conforming to the JSON Schema "Verbose" output format
-//!     let verbose = validator.validate_formatted(&instance, output::Verbose);
+//!     let verbose = validator.evaluate(&instance, output::Verbose);
 //!     // Serialize validation output to JSON according to the verbose output format
 //!     #[cfg(feature = "serde")]
 //!     {
@@ -68,9 +68,9 @@ pub use crate::{
     error::{Error, SchemaError, ValidationError},
     validation::{
         builder::{validator_for, ValidatorBuilder},
-        is_valid,
+        evaluate, is_valid,
         iter::ValidationErrorIter,
-        iter_errors, try_is_valid, validate, validate_formatted,
+        iter_errors, try_is_valid, validate,
         validator::Validator,
     },
 };
@@ -85,7 +85,7 @@ pub mod blocking {
         validation,
     };
     pub use validation::{
-        blocking::{is_valid, iter_errors, try_is_valid, validate, validate_formatted},
+        blocking::{evaluate, is_valid, iter_errors, try_is_valid, validate},
         builder::blocking::{validator_for, ValidatorBuilder},
     };
 

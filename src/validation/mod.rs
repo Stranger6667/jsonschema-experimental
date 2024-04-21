@@ -37,23 +37,19 @@ pub async fn try_iter_errors<'schema, 'instance, J: Json>(
     Ok(validator.iter_errors_once(instance))
 }
 
-pub async fn validate_formatted<F: OutputFormat, J: Json>(
-    instance: &J,
-    schema: &J,
-    format: F,
-) -> F::Output {
-    try_validate_formatted(instance, schema, format)
+pub async fn evaluate<F: OutputFormat, J: Json>(instance: &J, schema: &J, format: F) -> F::Output {
+    try_evaluate(instance, schema, format)
         .await
         .expect("Invalid schema")
 }
 
-pub async fn try_validate_formatted<F: OutputFormat, J: Json>(
+pub async fn try_evaluate<F: OutputFormat, J: Json>(
     instance: &J,
     schema: &J,
     format: F,
 ) -> Result<F::Output, SchemaError> {
     let validator = validator_for(schema).await?;
-    Ok(format.validate_formatted(&validator, instance))
+    Ok(format.evaluate(&validator, instance))
 }
 
 pub mod blocking {
@@ -91,20 +87,16 @@ pub mod blocking {
         Ok(validator.iter_errors_once(instance))
     }
 
-    pub fn validate_formatted<F: OutputFormat, J: Json>(
-        instance: &J,
-        schema: &J,
-        format: F,
-    ) -> F::Output {
-        try_validate_formatted(instance, schema, format).expect("Invalid schema")
+    pub fn evaluate<F: OutputFormat, J: Json>(instance: &J, schema: &J, format: F) -> F::Output {
+        try_evaluate(instance, schema, format).expect("Invalid schema")
     }
 
-    pub fn try_validate_formatted<F: OutputFormat, J: Json>(
+    pub fn try_evaluate<F: OutputFormat, J: Json>(
         instance: &J,
         schema: &J,
         format: F,
     ) -> Result<F::Output, SchemaError> {
         let validator = validator_for(schema)?;
-        Ok(format.validate_formatted(&validator, instance))
+        Ok(format.evaluate(&validator, instance))
     }
 }

@@ -4,7 +4,7 @@ use jsonlike::Json;
 pub trait OutputFormat {
     type Output;
 
-    fn validate_formatted<J: Json>(&self, validator: &Validator, instance: &J) -> Self::Output;
+    fn evaluate<J: Json>(&self, validator: &Validator, instance: &J) -> Self::Output;
 }
 
 pub struct Flag;
@@ -16,7 +16,7 @@ pub struct FlagOutput {
 impl OutputFormat for Flag {
     type Output = FlagOutput;
 
-    fn validate_formatted<J: Json>(&self, validator: &Validator, instance: &J) -> Self::Output {
+    fn evaluate<J: Json>(&self, validator: &Validator, instance: &J) -> Self::Output {
         FlagOutput {
             valid: validator.is_valid(instance),
         }
@@ -31,7 +31,7 @@ pub struct BasicOutput(OutputUnit);
 impl OutputFormat for Basic {
     type Output = BasicOutput;
 
-    fn validate_formatted<J: Json>(&self, validator: &Validator, instance: &J) -> Self::Output {
+    fn evaluate<J: Json>(&self, validator: &Validator, instance: &J) -> Self::Output {
         todo!()
     }
 }
@@ -44,7 +44,7 @@ pub struct DetailedOutput(OutputUnit);
 impl OutputFormat for Detailed {
     type Output = DetailedOutput;
 
-    fn validate_formatted<J: Json>(&self, validator: &Validator, instance: &J) -> Self::Output {
+    fn evaluate<J: Json>(&self, validator: &Validator, instance: &J) -> Self::Output {
         todo!()
     }
 }
@@ -57,7 +57,7 @@ pub struct VerboseOutput(OutputUnit);
 impl OutputFormat for Verbose {
     type Output = VerboseOutput;
 
-    fn validate_formatted<J: Json>(&self, validator: &Validator, instance: &J) -> Self::Output {
+    fn evaluate<J: Json>(&self, validator: &Validator, instance: &J) -> Self::Output {
         todo!()
     }
 }
