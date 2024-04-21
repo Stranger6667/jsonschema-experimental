@@ -9,7 +9,7 @@ pub const LATEST: Draft = Draft::Draft04;
 
 pub enum Draft {
     Draft04,
-    Draft07
+    Draft07,
 }
 
 pub trait IntoDraft {

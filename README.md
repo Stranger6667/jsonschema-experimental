@@ -37,7 +37,7 @@ use serde_json::json;
 async fn main() -> Result<(), jsonschema::Error> {
     let schema = json!({"type": "integer"});
     let instance = json!("a");
-    jsonschema::validate(&instance, &schema).await?;
+    jsonschema::validate(&instance, &schema).await;
     Ok(())
 }
 ```
@@ -54,11 +54,11 @@ async fn main() -> Result<(), jsonschema::Error> {
     let schema = json!({"type": "integer"});
     let instance = json!("a");
     // Boolean result
-    assert!(!jsonschema::is_valid(&instance, &schema).await?);
+    assert!(!jsonschema::is_valid(&instance, &schema).await);
     // Only first error as `Result<(), jsonschema::Error>`
     jsonschema::validate(&instance, &schema).await?;
     // Iterate over all errors
-    for error in jsonschema::iter_errors(&instance, &schema).await? {
+    for error in jsonschema::iter_errors(&instance, &schema).await {
         println!("{}", error);
     }
     Ok(())
@@ -75,11 +75,11 @@ fn main() -> Result<(), jsonschema::Error> {
     let schema = json!({"type": "integer"});
     let instance = json!("a");
     // Boolean result
-    assert!(!jsonschema::blocking::is_valid(&instance, &schema)?);
+    assert!(!jsonschema::blocking::is_valid(&instance, &schema));
     // Only first error as `Result<(), jsonschema::Error>`
     jsonschema::blocking::validate(&instance, &schema)?;
     // Iterate over all errors
-    for error in jsonschema::blocking::iter_errors(&instance, &schema)? {
+    for error in jsonschema::blocking::iter_errors(&instance, &schema) {
         println!("{}", error);
     }
     Ok(())
@@ -126,7 +126,7 @@ use serde_json::json;
 #[tokio::main]
 async fn main() -> Result<(), jsonschema::Error> {
     // ... omitted for brevity
-    let verbose = jsonschema::validate_formatted(&instance, &schema, output::Verbose).await?;
+    let verbose = jsonschema::validate_formatted(&instance, &schema, output::Verbose).await;
     // Serialize validation output to JSON
     let serialized = serde_json::to_string(&verbose).unwrap();
     Ok(())

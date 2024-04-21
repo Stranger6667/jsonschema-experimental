@@ -31,6 +31,7 @@ impl Display for ValidationError {
 
 impl std::error::Error for ValidationError {}
 
+/// Schema is invalid under its metaschema.
 #[derive(Debug)]
 pub enum SchemaError {}
 

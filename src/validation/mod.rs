@@ -1,14 +1,18 @@
-use std::marker::PhantomData;
-
 use jsonlike::Json;
-mod iter;
-pub use iter::ValidationErrorIter;
-mod validator;
-use crate::{compiler, drafts, drafts::Draft, error::Error, output::OutputFormat};
-pub use validator::Validator;
-use crate::drafts::IntoDraft;
+pub(crate) mod builder;
+pub(crate) mod iter;
+pub(crate) mod validator;
+use crate::{error::Error, output::OutputFormat, SchemaError};
+use builder::validator_for;
+use iter::ValidationErrorIter;
 
-pub async fn is_valid<J: Json>(schema: &J, instance: &J) -> Result<bool, Error> {
+pub async fn is_valid<J: Json>(schema: &J, instance: &J) -> bool {
+    try_is_valid(schema, instance)
+        .await
+        .expect("Invalid schema")
+}
+
+pub async fn try_is_valid<J: Json>(schema: &J, instance: &J) -> Result<bool, SchemaError> {
     Ok(validator_for(schema).await?.is_valid(instance))
 }
 
@@ -19,105 +23,52 @@ pub async fn validate<J: Json>(schema: &J, instance: &J) -> Result<(), Error> {
 pub async fn iter_errors<'schema, 'instance, J: Json>(
     schema: &'schema J,
     instance: &'instance J,
-) -> Result<ValidationErrorIter<'static, 'instance, J>, Error> {
-    let validator = validator_for(schema).await?;
-    Ok(validator.iter_errors_once(instance))
+) -> ValidationErrorIter<'static, 'instance, J> {
+    try_iter_errors(schema, instance)
+        .await
+        .expect("Invalid schema")
 }
 
-pub async fn validator_for<J: Json>(schema: &J) -> Result<Validator, Error> {
-    let draft = drafts::from_url("TODO").unwrap_or(drafts::LATEST);
-    ValidatorBuilderOptions::new(draft).build(schema).await
+pub async fn try_iter_errors<'schema, 'instance, J: Json>(
+    schema: &'schema J,
+    instance: &'instance J,
+) -> Result<ValidationErrorIter<'static, 'instance, J>, SchemaError> {
+    let validator = validator_for(schema).await?;
+    Ok(validator.iter_errors_once(instance))
 }
 
 pub async fn validate_formatted<F: OutputFormat, J: Json>(
     instance: &J,
     schema: &J,
     format: F,
-) -> Result<F::Output, Error> {
+) -> F::Output {
+    try_validate_formatted(instance, schema, format)
+        .await
+        .expect("Invalid schema")
+}
+
+pub async fn try_validate_formatted<F: OutputFormat, J: Json>(
+    instance: &J,
+    schema: &J,
+    format: F,
+) -> Result<F::Output, SchemaError> {
     let validator = validator_for(schema).await?;
-    format.validate_formatted(&validator, instance)
-}
-
-pub struct ValidatorBuilder<D: IntoDraft> {
-    _phantom: PhantomData<D>,
-}
-
-impl<D: IntoDraft> ValidatorBuilder<D> {
-    pub async fn from_schema<J: Json>(schema: &J) -> Result<Validator, Error> {
-        Self::options().build(schema).await
-    }
-
-    pub fn options() -> ValidatorBuilderOptions {
-        ValidatorBuilderOptions::new(D::get_draft())
-    }
-}
-
-pub struct ValidatorBuilderOptions {
-    draft: Draft,
-}
-
-impl Default for ValidatorBuilderOptions {
-    fn default() -> Self {
-        Self::new(drafts::LATEST)
-    }
-}
-
-impl ValidatorBuilderOptions {
-    fn new(draft: Draft) -> Self {
-        Self { draft }
-    }
-
-    pub async fn build<J: Json>(self, schema: &J) -> Result<Validator, Error> {
-        // TODO: Resolve references
-        compiler::compile::<J>(schema, self.draft)
-    }
+    Ok(format.validate_formatted(&validator, instance))
 }
 
 pub mod blocking {
     use crate::{
-        compiler, drafts, drafts::Draft, output::OutputFormat, validation::ValidationErrorIter,
-        Error, Validator,
+        output::OutputFormat,
+        validation::{builder::blocking::validator_for, ValidationErrorIter},
+        Error, SchemaError,
     };
     use jsonlike::Json;
-    use std::marker::PhantomData;
-    use crate::drafts::IntoDraft;
 
-    pub struct ValidatorBuilder<D: IntoDraft> {
-        _phantom: PhantomData<D>,
+    pub fn is_valid<J: Json>(schema: &J, instance: &J) -> bool {
+        try_is_valid(schema, instance).expect("Invalid schema")
     }
 
-    impl<D: IntoDraft> ValidatorBuilder<D> {
-        pub fn from_schema<J: Json>(schema: &J) -> Result<Validator, Error> {
-            Self::options().build(schema)
-        }
-
-        pub fn options() -> ValidatorBuilderOptions {
-            ValidatorBuilderOptions::new(D::get_draft())
-        }
-    }
-
-    pub struct ValidatorBuilderOptions {
-        draft: Draft,
-    }
-
-    impl Default for ValidatorBuilderOptions {
-        fn default() -> Self {
-            Self::new(drafts::LATEST)
-        }
-    }
-
-    impl ValidatorBuilderOptions {
-        pub(crate) fn new(draft: Draft) -> Self {
-            Self { draft }
-        }
-
-        pub fn build<J: Json>(self, schema: &J) -> Result<Validator, Error> {
-            // TODO: Resolve references
-            compiler::compile::<J>(schema, self.draft)
-        }
-    }
-
-    pub fn is_valid<J: Json>(schema: &J, instance: &J) -> Result<bool, Error> {
+    pub fn try_is_valid<J: Json>(schema: &J, instance: &J) -> Result<bool, SchemaError> {
         Ok(validator_for(schema)?.is_valid(instance))
     }
 
@@ -128,22 +79,32 @@ pub mod blocking {
     pub fn iter_errors<'instance, J: Json>(
         schema: &J,
         instance: &'instance J,
-    ) -> Result<ValidationErrorIter<'static, 'instance, J>, Error> {
-        let validator = validator_for(schema)?;
-        Ok(validator.iter_errors_once(instance))
+    ) -> ValidationErrorIter<'static, 'instance, J> {
+        try_iter_errors(schema, instance).expect("Invalid schema")
     }
 
-    pub fn validator_for<J: Json>(schema: &J) -> Result<Validator, Error> {
-        let draft = drafts::from_url("TODO").unwrap_or(drafts::LATEST);
-        ValidatorBuilderOptions::new(draft).build(schema)
+    pub fn try_iter_errors<'instance, J: Json>(
+        schema: &J,
+        instance: &'instance J,
+    ) -> Result<ValidationErrorIter<'static, 'instance, J>, SchemaError> {
+        let validator = validator_for(schema)?;
+        Ok(validator.iter_errors_once(instance))
     }
 
     pub fn validate_formatted<F: OutputFormat, J: Json>(
         instance: &J,
         schema: &J,
         format: F,
-    ) -> Result<F::Output, Error> {
+    ) -> F::Output {
+        try_validate_formatted(instance, schema, format).expect("Invalid schema")
+    }
+
+    pub fn try_validate_formatted<F: OutputFormat, J: Json>(
+        instance: &J,
+        schema: &J,
+        format: F,
+    ) -> Result<F::Output, SchemaError> {
         let validator = validator_for(schema)?;
-        format.validate_formatted(&validator, instance)
+        Ok(format.validate_formatted(&validator, instance))
     }
 }

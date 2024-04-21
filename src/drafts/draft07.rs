@@ -1,10 +1,11 @@
+use crate::{
+    drafts::{Draft, IntoDraft},
+    vocabulary::Keyword,
+};
 use jsonlike::Json;
-use crate::drafts::{Draft, IntoDraft};
-use crate::vocabulary::Keyword;
 
 #[derive(Debug, Default)]
 pub struct Draft07;
-
 
 impl IntoDraft for Draft07 {
     fn get_draft() -> Draft {

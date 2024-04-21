@@ -8,21 +8,21 @@
 //!     let instance = serde_json::json!("a");
 //!
 //!     // One-off validation with a boolean result
-//!     jsonschema::is_valid(&instance, &schema).await?;
-//!     jsonschema::blocking::is_valid(&instance, &schema)?;
+//!     jsonschema::is_valid(&instance, &schema).await;
+//!     jsonschema::blocking::is_valid(&instance, &schema);
 //!     // One-off with the first error as `Result<(), jsonschema::Error>`
 //!     jsonschema::validate(&instance, &schema).await?;
 //!     jsonschema::blocking::validate(&instance, &schema)?;
 //!     // One-off iteration over errors
-//!     for error in jsonschema::iter_errors(&instance, &schema).await? {
+//!     for error in jsonschema::iter_errors(&instance, &schema).await {
 //!         println!("{}", error);
 //!     }
-//!     for error in jsonschema::blocking::iter_errors(&instance, &schema)? {
+//!     for error in jsonschema::blocking::iter_errors(&instance, &schema) {
 //!         println!("{}", error);
 //!     }
 //!     // One-off collecting validation results into a struct conforming to the JSON Schema "Verbose" output format
-//!     let verbose = jsonschema::validate_formatted(&instance, &schema, output::Verbose).await?;
-//!     let verbose = jsonschema::blocking::validate_formatted(&instance, &schema, output::Verbose)?;
+//!     let verbose = jsonschema::validate_formatted(&instance, &schema, output::Verbose).await;
+//!     let verbose = jsonschema::blocking::validate_formatted(&instance, &schema, output::Verbose);
 //!     // Serialize validation output to JSON (requires the `serde` feature)
 //!     #[cfg(feature = "serde")]
 //!     {
@@ -47,7 +47,7 @@
 //!     }
 //!
 //!     // Collecting validation results into a struct conforming to the JSON Schema "Verbose" output format
-//!     let verbose = validator.validate_formatted(&instance, output::Verbose)?;
+//!     let verbose = validator.validate_formatted(&instance, output::Verbose);
 //!     // Serialize validation output to JSON according to the verbose output format
 //!     #[cfg(feature = "serde")]
 //!     {
@@ -67,25 +67,30 @@ mod vocabulary;
 pub use crate::{
     error::{Error, SchemaError, ValidationError},
     validation::{
-        is_valid, iter_errors, validate, validate_formatted, validator_for, Validator,
+        builder::{validator_for, ValidatorBuilder},
+        is_valid,
+        iter::ValidationErrorIter,
+        iter_errors, try_is_valid, validate, validate_formatted,
+        validator::Validator,
     },
 };
 use drafts::{Draft04, Draft07};
 
-pub type Draft4Validator = validation::ValidatorBuilder<Draft04>;
-pub type Draft7Validator = validation::ValidatorBuilder<Draft07>;
+pub type Draft4Validator = ValidatorBuilder<Draft04>;
+pub type Draft7Validator = ValidatorBuilder<Draft07>;
 
 pub mod blocking {
     use crate::{
         drafts::{Draft04, Draft07},
         validation,
     };
-    pub use validation::blocking::{
-        is_valid, iter_errors, validate, validate_formatted, validator_for,
+    pub use validation::{
+        blocking::{is_valid, iter_errors, try_is_valid, validate, validate_formatted},
+        builder::blocking::{validator_for, ValidatorBuilder},
     };
 
-    pub type Draft4Validator = validation::blocking::ValidatorBuilder<Draft04>;
-    pub type Draft7Validator = validation::blocking::ValidatorBuilder<Draft07>;
+    pub type Draft4Validator = ValidatorBuilder<Draft04>;
+    pub type Draft7Validator = ValidatorBuilder<Draft07>;
 }
 
 #[cfg(all(test, feature = "serde_json"))]

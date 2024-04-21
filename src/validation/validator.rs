@@ -39,7 +39,7 @@ impl Validator {
         &self,
         instance: &J,
         format: F,
-    ) -> Result<F::Output, Error> {
+    ) -> F::Output {
         format.validate_formatted(self, instance)
     }
 }

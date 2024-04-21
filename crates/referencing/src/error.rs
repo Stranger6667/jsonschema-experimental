@@ -26,19 +26,6 @@ impl ReferencingError {
     }
 }
 
-impl ReferencingError {
-    pub(crate) fn unresolvable(reference: impl Into<String>) -> ReferencingError {
-        ReferencingError::Unresolvable {
-            reference: reference.into(),
-        }
-    }
-    pub(crate) fn pointer_to_nowhere(reference: impl Into<String>) -> ReferencingError {
-        ReferencingError::PointerToNowhere {
-            reference: reference.into(),
-        }
-    }
-}
-
 impl fmt::Display for ReferencingError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
