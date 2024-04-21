@@ -6,9 +6,9 @@ mod draft202012;
 use crate::vocabulary::Keyword;
 use jsonlike::Json;
 
-pub const LATEST: Draft = Draft::Draft04;
+pub(crate) const LATEST: Draft = Draft::Draft04;
 
-pub enum Draft {
+pub(crate) enum Draft {
     Draft04,
     Draft06,
     Draft07,

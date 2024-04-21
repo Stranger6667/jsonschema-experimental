@@ -64,8 +64,8 @@ pub mod output;
 mod validation;
 mod vocabulary;
 
+use crate::drafts::Draft;
 pub use crate::{
-    drafts::Draft,
     error::{Error, SchemaError, ValidationError},
     validation::{
         builder::{validator_for, ValidatorBuilderOptions},
