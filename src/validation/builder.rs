@@ -1,4 +1,6 @@
-use jsonlike::Json;
+use std::borrow::Borrow;
+
+use jsonlike::prelude::*;
 
 use crate::{
     compiler,
@@ -7,7 +9,15 @@ use crate::{
 };
 
 pub async fn validator_for<J: Json>(schema: &J) -> Result<Validator, SchemaError> {
-    let draft = drafts::from_url("TODO").unwrap_or(drafts::LATEST);
+    let draft = if let Some(object) = schema.as_object() {
+        if let Some(url) = object.get("$schema").and_then(Json::as_string) {
+            drafts::from_url(url.borrow()).unwrap_or(drafts::LATEST)
+        } else {
+            drafts::LATEST
+        }
+    } else {
+        drafts::LATEST
+    };
     ValidatorBuilderOptions::new(draft).build(schema).await
 }
 
