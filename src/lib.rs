@@ -1,6 +1,6 @@
 //!
 //! ```rust
-//! use jsonschema::output;
+//! use jsonschema::{output, Draft};
 //!
 //! #[cfg(feature = "serde_json")]
 //! async fn test() -> Result<(), jsonschema::Error> {
@@ -33,8 +33,13 @@
 //!     let validator = jsonschema::validator_for(&schema).await?;
 //!     let validator = jsonschema::blocking::validator_for(&schema)?;
 //!     // Specific draft
-//!     let validator = jsonschema::Draft4Validator::from_schema(&schema).await?;
-//!     let validator = jsonschema::blocking::Draft4Validator::from_schema(&schema)?;
+//!     let validator = jsonschema::Validator::options()
+//!         .with_draft(Draft::Draft04)
+//!         .build(&schema)
+//!         .await?;
+//!     let validator = jsonschema::blocking::Validator::options()
+//!         .with_draft(Draft::Draft04)
+//!         .build(&schema)?;
 //!
 //!     // Boolean result
 //!     assert!(!validator.is_valid(&instance));
@@ -64,65 +69,47 @@ pub mod output;
 mod validation;
 mod vocabulary;
 
-use crate::drafts::Draft;
 pub use crate::{
+    drafts::Draft,
     error::{Error, SchemaError, ValidationError},
     validation::{
-        builder::{validator_for, ValidatorBuilderOptions},
+        builder::{validator_for, ValidatorBuilder},
         evaluate, is_valid,
         iter::ValidationErrorIter,
-        iter_errors, try_evaluate, try_is_valid, try_iter_errors, validate,
-        validator::Validator,
+        iter_errors, try_evaluate, try_is_valid, try_iter_errors, validate, Validator,
     },
 };
-use validation::builder::define_validator;
-
-define_validator!(Draft4Validator, Draft::Draft04);
-define_validator!(Draft6Validator, Draft::Draft06);
-define_validator!(Draft7Validator, Draft::Draft07);
-define_validator!(Draft201909Validator, Draft::Draft201909);
-define_validator!(Draft202012Validator, Draft::Draft202012);
 
 pub mod blocking {
-    use crate::drafts::Draft;
-    use crate::validation::builder::blocking::define_validator;
     pub use crate::validation::{
         blocking::{
             evaluate, is_valid, iter_errors, try_evaluate, try_is_valid, try_iter_errors, validate,
+            Validator,
         },
-        builder::blocking::validator_for,
+        builder::blocking::{validator_for, ValidatorBuilder},
     };
-
-    define_validator!(Draft4Validator, Draft::Draft04);
-    define_validator!(Draft6Validator, Draft::Draft06);
-    define_validator!(Draft7Validator, Draft::Draft07);
-    define_validator!(Draft201909Validator, Draft::Draft201909);
-    define_validator!(Draft202012Validator, Draft::Draft202012);
 }
 
 #[cfg(all(test, feature = "serde_json"))]
 mod tests {
-    use super::*;
     use serde_json::json;
 
     #[tokio::test]
-    async fn test_from_schema() {
+    async fn test_validator_for() {
         let schema = json!({"type": "integer"});
-        let validator = Draft4Validator::from_schema(&schema)
-            .await
-            .expect("Invalid schema");
+        let validator = crate::validator_for(&schema).await.expect("Invalid schema");
     }
 
     #[test]
-    fn test_from_schema_blocking() {
+    fn test_validator_for_blocking() {
         let schema = json!({"type": "integer"});
-        let validator = blocking::Draft4Validator::from_schema(&schema).expect("Invalid schema");
+        let validator = crate::blocking::validator_for(&schema).expect("Invalid schema");
     }
 
     #[tokio::test]
     async fn test_options() {
         let schema = json!({"type": "integer"});
-        let validator = Draft4Validator::options()
+        let validator = crate::Validator::options()
             .build(&schema)
             .await
             .expect("Invalid schema");
@@ -131,7 +118,7 @@ mod tests {
     #[test]
     fn test_options_blocking() {
         let schema = json!({"type": "integer"});
-        let validator = blocking::Draft4Validator::options()
+        let validator = crate::blocking::ValidatorBuilder::default()
             .build(&schema)
             .expect("Invalid schema");
     }

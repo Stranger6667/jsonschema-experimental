@@ -10,51 +10,32 @@ use crate::{
 
 pub async fn validator_for<J: Json>(schema: &J) -> Result<Validator, SchemaError> {
     let draft = draft_from_schema(schema);
-    ValidatorBuilderOptions::new(draft).build(schema).await
+    ValidatorBuilder::new(draft).build(schema).await
 }
 
 fn draft_from_schema(schema: &impl Json) -> Draft {
     if let Some(object) = schema.as_object() {
         if let Some(url) = object.get("$schema").and_then(Json::as_string) {
-            drafts::from_url(url.borrow()).unwrap_or(drafts::LATEST)
+            drafts::from_url(url.borrow()).unwrap_or_else(Draft::latest)
         } else {
-            drafts::LATEST
+            Draft::latest()
         }
     } else {
-        drafts::LATEST
+        Draft::latest()
     }
 }
 
-macro_rules! define_validator {
-    ($name:ident, $draft:expr) => {
-        pub struct $name;
-        impl $name {
-            pub async fn from_schema<J: jsonlike::Json>(
-                schema: &J,
-            ) -> Result<$crate::Validator, $crate::error::SchemaError> {
-                Self::options().build(schema).await
-            }
-
-            pub fn options() -> $crate::validation::builder::ValidatorBuilderOptions {
-                $crate::validation::builder::ValidatorBuilderOptions::new($draft)
-            }
-        }
-    };
-}
-
-pub(crate) use define_validator;
-
-pub struct ValidatorBuilderOptions {
+pub struct ValidatorBuilder {
     draft: Draft,
 }
 
-impl Default for ValidatorBuilderOptions {
+impl Default for ValidatorBuilder {
     fn default() -> Self {
-        Self::new(drafts::LATEST)
+        Self::new(Draft::latest())
     }
 }
 
-impl ValidatorBuilderOptions {
+impl ValidatorBuilder {
     pub(crate) fn new(draft: Draft) -> Self {
         Self { draft }
     }
@@ -63,48 +44,33 @@ impl ValidatorBuilderOptions {
         // TODO: Resolve references
         compiler::compile::<J>(schema, self.draft)
     }
+    pub fn with_draft(mut self, draft: Draft) -> Self {
+        self.draft = draft;
+        self
+    }
 }
 
 pub mod blocking {
     use super::draft_from_schema;
-    use crate::{compiler, drafts, drafts::Draft, SchemaError, Validator};
+    use crate::{compiler, drafts::Draft, SchemaError, Validator};
     use jsonlike::Json;
 
     pub fn validator_for<J: Json>(schema: &J) -> Result<Validator, SchemaError> {
         let draft = draft_from_schema(schema);
-        ValidatorBuilderOptions::new(draft).build(schema)
+        ValidatorBuilder::new(draft).build(schema)
     }
 
-    macro_rules! define_validator {
-        ($name:ident, $draft:expr) => {
-            pub struct $name;
-            impl $name {
-                pub fn from_schema<J: jsonlike::Json>(
-                    schema: &J,
-                ) -> Result<$crate::Validator, $crate::error::SchemaError> {
-                    Self::options().build(schema)
-                }
-
-                pub fn options() -> $crate::validation::builder::blocking::ValidatorBuilderOptions {
-                    $crate::validation::builder::blocking::ValidatorBuilderOptions::new($draft)
-                }
-            }
-        };
-    }
-
-    pub(crate) use define_validator;
-
-    pub struct ValidatorBuilderOptions {
+    pub struct ValidatorBuilder {
         draft: Draft,
     }
 
-    impl Default for ValidatorBuilderOptions {
+    impl Default for ValidatorBuilder {
         fn default() -> Self {
-            Self::new(drafts::LATEST)
+            Self::new(Draft::latest())
         }
     }
 
-    impl ValidatorBuilderOptions {
+    impl ValidatorBuilder {
         pub(crate) fn new(draft: Draft) -> Self {
             Self { draft }
         }
@@ -112,6 +78,10 @@ pub mod blocking {
         pub fn build<J: Json>(self, schema: &J) -> Result<Validator, SchemaError> {
             // TODO: Resolve references
             compiler::compile::<J>(schema, self.draft)
+        }
+        pub fn with_draft(mut self, draft: Draft) -> Self {
+            self.draft = draft;
+            self
         }
     }
 }

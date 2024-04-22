@@ -6,9 +6,7 @@ mod draft202012;
 use crate::vocabulary::Keyword;
 use jsonlike::Json;
 
-pub(crate) const LATEST: Draft = Draft::Draft04;
-
-pub(crate) enum Draft {
+pub enum Draft {
     Draft04,
     Draft06,
     Draft07,
@@ -17,6 +15,9 @@ pub(crate) enum Draft {
 }
 
 impl Draft {
+    pub fn latest() -> Self {
+        Self::Draft202012
+    }
     pub(crate) fn get_keyword<J: Json>(&self, key: &str, value: &J) -> Option<Keyword> {
         match self {
             Draft::Draft04 => draft04::get_keyword(key, value),
@@ -41,7 +42,7 @@ pub(crate) fn from_url(mut url: &str) -> Option<Draft> {
         url = cleaned;
     }
     match url {
-        "json-schema.org/schema" => Some(LATEST),
+        "json-schema.org/schema" => Some(Draft::latest()),
         "json-schema.org/draft/2020-12/schema" => Some(Draft::Draft202012),
         "json-schema.org/draft/2019-09/schema" => Some(Draft::Draft201909),
         "json-schema.org/draft-07/schema" => Some(Draft::Draft07),
