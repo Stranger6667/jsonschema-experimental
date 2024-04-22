@@ -17,17 +17,27 @@ pub trait CustomKeyword: Send + Sync + core::fmt::Debug + 'static {
         Self: Sized;
 }
 
-pub trait CustomKeywordConstructor<'a, J: Json>: Send + Sync + 'static {
-    fn new(&self, schema: &'a J) -> Arc<dyn CustomKeyword>
+mod sealed {
+
+    pub trait Sealed<J> {}
+}
+
+pub trait CustomKeywordConstructor<'a, J: Json>: Send + Sync + sealed::Sealed<J> + 'static {
+    fn init(&self, schema: &'a J) -> Arc<dyn CustomKeyword>
     where
         Self: Sized;
+}
+
+impl<'a, F, J: Json + 'a> sealed::Sealed<J> for F where
+    F: Fn(&'a J) -> Arc<dyn CustomKeyword> + Send + Sync + 'static
+{
 }
 
 impl<'a, F, J: Json + 'a> CustomKeywordConstructor<'a, J> for F
 where
     F: Fn(&'a J) -> Arc<dyn CustomKeyword> + Send + Sync + 'static,
 {
-    fn new(&self, schema: &'a J) -> Arc<dyn CustomKeyword>
+    fn init(&self, schema: &'a J) -> Arc<dyn CustomKeyword>
     where
         Self: Sized,
     {

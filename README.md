@@ -152,6 +152,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ```rust
 use serde_json::json;
+use jsonschema::Json;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -174,10 +175,37 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
+    #[derive(Debug)]
+    struct AsciiKeyword {
+        size: usize
+    }
+
+    impl jsonschema::CustomKeyword for AsciiKeyword {
+        fn is_valid<J: Json>(&self, instance: &J) -> bool {
+            if let Some(string) = instance.as_string() {
+                 let string = string.borrow();
+                 string.len() == self.size && string.chars().all(|c| c.is_ascii())
+            } else {
+                true
+            }
+        }
+    }
+
+    fn ascii_keyword(schema: &impl Json) -> Arc<dyn jsonschema::CustomKeyword> {
+        Arc::new(AsciiKeyword { size: 42 })
+    }
+
     let validator = jsonschema::ValidatorBuilder::default()
         .resolver(CustomResolver)
         .format("custom", my_custom_format)
         .format("size", CustomSize { size: 5 })
+        .keyword(
+            "ascii",
+            |schema| -> Arc<dyn jsonschema::CustomKeyword> {
+                Arc::new(AsciiKeyword { size: 42 })
+            }
+        )
+        .keyword("also-ascii", ascii_keyword)
         .build(&schema)
         .await?;
 
