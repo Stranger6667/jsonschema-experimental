@@ -95,7 +95,7 @@
 //!         }
 //!     }
 //!
-//!     fn ascii_keyword(schema: &impl Json) -> Arc<dyn jsonschema::CustomKeyword> {
+//!     fn ascii_keyword_factory(schema: &impl Json) -> Arc<dyn jsonschema::CustomKeyword> {
 //!         Arc::new(AsciiKeyword { size: 42 })
 //!     }
 //!
@@ -116,7 +116,7 @@
 //!         .resolver(CustomResolver)
 //!         .format("custom", my_custom_format)
 //!         .format("size", CustomSize { size: 5 })
-//!         .keyword("ascii", ascii_keyword)
+//!         .keyword("ascii", ascii_keyword_factory)
 //!         .build(&schema)?;
 //!
 //!     Ok(())

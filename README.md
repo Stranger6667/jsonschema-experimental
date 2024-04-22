@@ -55,7 +55,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let instance = json!("a");
     // Boolean result
     assert!(!jsonschema::is_valid(&instance, &schema).await);
-    // Only first error as `Result<(), Box<dyn std::error::Error>>`
+    // Only first error as `Result<(), jsonschema::ValidationError>`
     jsonschema::validate(&instance, &schema).await?;
     // Iterate over all errors
     for error in jsonschema::iter_errors(&instance, &schema).await {
@@ -76,7 +76,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let instance = json!("a");
     // Boolean result
     assert!(!jsonschema::blocking::is_valid(&instance, &schema));
-    // Only first error as `Result<(), Box<dyn std::error::Error>>`
+    // Only first error as `Result<(), jsonschema::ValidationError>`
     jsonschema::blocking::validate(&instance, &schema)?;
     // Iterate over all errors
     for error in jsonschema::blocking::iter_errors(&instance, &schema) {
@@ -132,27 +132,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-### Using specific drafts
-
-```rust
-use serde_json::json;
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // ... omitted for brevity
-    let validator = jsonschema::ValidatorBuilder::default()
-        .draft(jsonschema::Draft::Draft7)
-        .build(&schema).await?;
-    validator.validate(&instance)?;
-    Ok(())
-}
-```
-
 ### Customization
 
 ```rust
 use serde_json::json;
 use jsonschema::Json;
+use jsonlike::prelude::*;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -161,7 +146,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     impl jsonschema::ReferenceResolver for CustomResolver {};
 
-    fn my_custom_format(value: &str) -> bool {
+    fn custom_format(value: &str) -> bool {
        value.len() == 3
     }
 
@@ -191,13 +176,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    fn ascii_keyword(schema: &impl Json) -> Arc<dyn jsonschema::CustomKeyword> {
+    fn ascii_keyword_factory(schema: &impl Json) -> Arc<dyn jsonschema::CustomKeyword> {
         Arc::new(AsciiKeyword { size: 42 })
     }
 
     let validator = jsonschema::ValidatorBuilder::default()
+        .draft(jsonschema::Draft::Draft7)
         .resolver(CustomResolver)
-        .format("custom", my_custom_format)
+        .format("custom", custom_format)
         .format("size", CustomSize { size: 5 })
         .keyword(
             "ascii",
@@ -205,7 +191,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Arc::new(AsciiKeyword { size: 42 })
             }
         )
-        .keyword("also-ascii", ascii_keyword)
+        .keyword("also-ascii", ascii_keyword_factory)
         .build(&schema)
         .await?;
 
