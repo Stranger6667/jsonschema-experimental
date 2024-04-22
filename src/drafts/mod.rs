@@ -3,8 +3,10 @@ mod draft06;
 mod draft07;
 mod draft201909;
 mod draft202012;
+use std::borrow::Borrow;
+
 use crate::vocabulary::Keyword;
-use jsonlike::Json;
+use jsonlike::prelude::*;
 
 pub enum Draft {
     Draft04,
@@ -49,5 +51,16 @@ pub(crate) fn from_url(mut url: &str) -> Option<Draft> {
         "json-schema.org/draft-06/schema" => Some(Draft::Draft06),
         "json-schema.org/draft-04/schema" => Some(Draft::Draft04),
         _ => None,
+    }
+}
+pub(crate) fn draft_from_schema(schema: &impl Json) -> Draft {
+    if let Some(object) = schema.as_object() {
+        if let Some(url) = object.get("$schema").and_then(Json::as_string) {
+            from_url(url.borrow()).unwrap_or_else(Draft::latest)
+        } else {
+            Draft::latest()
+        }
+    } else {
+        Draft::latest()
     }
 }

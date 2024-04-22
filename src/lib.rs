@@ -37,7 +37,7 @@
 //!         .with_draft(Draft::Draft04)
 //!         .build(&schema)
 //!         .await?;
-//!     let validator = jsonschema::blocking::Validator::options()
+//!     let validator = jsonschema::blocking::ValidatorBuilder::default()
 //!         .with_draft(Draft::Draft04)
 //!         .build(&schema)?;
 //!
@@ -61,6 +61,7 @@
 //!     Ok(())
 //! }
 //! ```
+pub mod blocking;
 mod compiler;
 mod drafts;
 mod error;
@@ -72,6 +73,7 @@ mod vocabulary;
 pub use crate::{
     drafts::Draft,
     error::{Error, SchemaError, ValidationError},
+    output::OutputFormat,
     validation::{
         builder::{validator_for, ValidatorBuilder},
         evaluate, is_valid,
@@ -79,16 +81,6 @@ pub use crate::{
         iter_errors, try_evaluate, try_is_valid, try_iter_errors, validate, Validator,
     },
 };
-
-pub mod blocking {
-    pub use crate::validation::{
-        blocking::{
-            evaluate, is_valid, iter_errors, try_evaluate, try_is_valid, try_iter_errors, validate,
-            Validator,
-        },
-        builder::blocking::{validator_for, ValidatorBuilder},
-    };
-}
 
 #[cfg(all(test, feature = "serde_json"))]
 mod tests {
