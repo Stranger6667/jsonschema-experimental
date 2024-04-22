@@ -1,7 +1,7 @@
 //!
 //! ```rust
 //! #[cfg(feature = "serde_json")]
-//! async fn test() -> Result<(), jsonschema::Error> {
+//! async fn test() -> Result<(), Box<dyn std::error::Error>> {
 //!     let schema = serde_json::json!({"type": "integer"});
 //!     let instance = serde_json::json!("a");
 //!
@@ -70,7 +70,7 @@ mod vocabulary;
 
 pub use crate::{
     drafts::Draft,
-    error::{Error, SchemaError, ValidationError},
+    error::{BuildError, ValidationError},
     output::Output,
     validation::{
         builder::{validator_for, ValidatorBuilder},

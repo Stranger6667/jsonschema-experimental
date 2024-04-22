@@ -1,59 +1,31 @@
-use std::fmt::{Display, Formatter};
-
-#[derive(Debug)]
-pub enum Error {
-    Validation(ValidationError),
-    Schema(SchemaError),
+/// An error that occured during the building of a validator.
+#[derive(Clone, Debug)]
+pub struct BuildError {
+    kind: BuildErrorKind,
 }
 
-impl From<SchemaError> for Error {
-    fn from(value: SchemaError) -> Self {
-        Error::Schema(value)
+#[derive(Clone, Debug)]
+enum BuildErrorKind {}
+
+impl core::fmt::Display for BuildError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        todo!()
     }
 }
 
-impl From<ValidationError> for Error {
-    fn from(value: ValidationError) -> Self {
-        Error::Validation(value)
-    }
-}
+impl std::error::Error for BuildError {}
 
-// TODO: Bound to instance? and maybe validator? Not clear if it is convenient for the end user,
-// check existing library and see what is used there
-#[derive(Debug)]
-pub enum ValidationError {}
+/// An error that occured during JSON Schema validation.
+#[derive(Clone, Debug)]
+pub struct ValidationError(Box<ValidationErrorKind>);
 
-impl Display for ValidationError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+#[derive(Clone, Debug)]
+pub enum ValidationErrorKind {}
+
+impl core::fmt::Display for ValidationError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         todo!()
     }
 }
 
 impl std::error::Error for ValidationError {}
-
-/// Schema is invalid under its metaschema.
-#[derive(Debug)]
-pub enum SchemaError {}
-
-impl Display for SchemaError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        todo!()
-    }
-}
-
-impl std::error::Error for SchemaError {}
-
-impl Display for Error {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        todo!()
-    }
-}
-
-impl std::error::Error for Error {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Error::Validation(error) => Some(error),
-            Error::Schema(error) => Some(error),
-        }
-    }
-}

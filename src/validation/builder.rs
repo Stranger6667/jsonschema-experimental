@@ -3,10 +3,10 @@ use jsonlike::Json;
 use crate::{
     compiler,
     drafts::{draft_from_schema, Draft},
-    SchemaError, Validator,
+    BuildError, Validator,
 };
 
-pub async fn validator_for<J: Json>(schema: &J) -> Result<Validator, SchemaError> {
+pub async fn validator_for<J: Json>(schema: &J) -> Result<Validator, BuildError> {
     let draft = draft_from_schema(schema);
     ValidatorBuilder::new(draft).build(schema).await
 }
@@ -26,7 +26,7 @@ impl ValidatorBuilder {
         Self { draft }
     }
 
-    pub async fn build<J: Json>(self, schema: &J) -> Result<Validator, SchemaError> {
+    pub async fn build<J: Json>(self, schema: &J) -> Result<Validator, BuildError> {
         // TODO: Resolve references
         compiler::compile::<J>(schema, self.draft)
     }

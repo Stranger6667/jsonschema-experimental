@@ -34,7 +34,7 @@ One-off validation:
 use serde_json::json;
 
 #[tokio::main]
-async fn main() -> Result<(), jsonschema::Error> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let schema = json!({"type": "integer"});
     let instance = json!("a");
     jsonschema::validate(&instance, &schema).await;
@@ -50,12 +50,12 @@ async fn main() -> Result<(), jsonschema::Error> {
 use serde_json::json;
 
 #[tokio::main]
-async fn main() -> Result<(), jsonschema::Error> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let schema = json!({"type": "integer"});
     let instance = json!("a");
     // Boolean result
     assert!(!jsonschema::is_valid(&instance, &schema).await);
-    // Only first error as `Result<(), jsonschema::Error>`
+    // Only first error as `Result<(), Box<dyn std::error::Error>>`
     jsonschema::validate(&instance, &schema).await?;
     // Iterate over all errors
     for error in jsonschema::iter_errors(&instance, &schema).await {
@@ -71,12 +71,12 @@ The blocking API is available inside the `blocking` module. Use it if your schem
 ```rust
 use serde_json::json;
 
-fn main() -> Result<(), jsonschema::Error> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let schema = json!({"type": "integer"});
     let instance = json!("a");
     // Boolean result
     assert!(!jsonschema::blocking::is_valid(&instance, &schema));
-    // Only first error as `Result<(), jsonschema::Error>`
+    // Only first error as `Result<(), Box<dyn std::error::Error>>`
     jsonschema::blocking::validate(&instance, &schema)?;
     // Iterate over all errors
     for error in jsonschema::blocking::iter_errors(&instance, &schema) {
@@ -92,7 +92,7 @@ If you need to validate multiple instances against the same schema, build a vali
 use serde_json::json;
 
 #[tokio::main]
-async fn main() -> Result<(), jsonschema::Error> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let schema = json!({"type": "integer"});
     // Build once, reuse many times
     let validator = jsonschema::validator_for(&schema).await?;
@@ -123,7 +123,7 @@ async fn main() -> Result<(), jsonschema::Error> {
 use serde_json::json;
 
 #[tokio::main]
-async fn main() -> Result<(), jsonschema::Error> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ... omitted for brevity
     let verbose = jsonschema::evaluate(&instance, &schema).await.verbose();
     // Serialize validation output to JSON
@@ -138,7 +138,7 @@ async fn main() -> Result<(), jsonschema::Error> {
 use serde_json::json;
 
 #[tokio::main]
-async fn main() -> Result<(), jsonschema::Error> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ... omitted for brevity
     let validator = jsonschema::ValidatorBuilder::default()
         .with_draft(jsonschema::Draft::Draft7)
@@ -154,7 +154,7 @@ async fn main() -> Result<(), jsonschema::Error> {
 use serde_json::json;
 
 #[tokio::main]
-async fn main() -> Result<(), jsonschema::Error> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ... omitted for brevity
     let validator = jsonschema::ValidatorBuilder::default()
         // I.e. a resolver that forbids references

@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use jsonlike::Json;
 pub(crate) mod builder;
 pub(crate) mod iter;
-use crate::{error::Error, graph, output::Output, vocabulary::Keyword, SchemaError};
+use crate::{graph, output::Output, vocabulary::Keyword, BuildError, ValidationError};
 use builder::validator_for;
 use iter::ValidationErrorIter;
 
@@ -13,12 +13,21 @@ pub async fn is_valid<J: Json>(schema: &J, instance: &J) -> bool {
         .expect("Invalid schema")
 }
 
-pub async fn try_is_valid<J: Json>(schema: &J, instance: &J) -> Result<bool, SchemaError> {
+pub async fn try_is_valid<J: Json>(schema: &J, instance: &J) -> Result<bool, BuildError> {
     Ok(validator_for(schema).await?.is_valid(instance))
 }
 
-pub async fn validate<J: Json>(schema: &J, instance: &J) -> Result<(), Error> {
-    validator_for(schema).await?.validate(instance)
+pub async fn validate<J: Json>(schema: &J, instance: &J) -> Result<(), ValidationError> {
+    try_validate(schema, instance)
+        .await
+        .expect("Invalid schema")
+}
+
+pub async fn try_validate<J: Json>(
+    schema: &J,
+    instance: &J,
+) -> Result<Result<(), ValidationError>, BuildError> {
+    Ok(validator_for(schema).await?.validate(instance))
 }
 
 pub async fn iter_errors<'schema, 'instance, J: Json>(
@@ -33,7 +42,7 @@ pub async fn iter_errors<'schema, 'instance, J: Json>(
 pub async fn try_iter_errors<'schema, 'instance, J: Json>(
     schema: &'schema J,
     instance: &'instance J,
-) -> Result<ValidationErrorIter<'static, 'instance, J>, SchemaError> {
+) -> Result<ValidationErrorIter<'static, 'instance, J>, BuildError> {
     let validator = validator_for(schema).await?;
     Ok(validator.iter_errors_once(instance))
 }
@@ -47,7 +56,7 @@ pub async fn evaluate<'i, J: Json>(instance: &'i J, schema: &J) -> Output<'stati
 pub async fn try_evaluate<'i, J: Json>(
     instance: &'i J,
     schema: &J,
-) -> Result<Output<'static, 'i, J>, SchemaError> {
+) -> Result<Output<'static, 'i, J>, BuildError> {
     Ok(validator_for(schema).await?.evaluate_once(instance))
 }
 
@@ -64,10 +73,10 @@ impl Validator {
     pub fn is_valid<J: Json>(&self, instance: &J) -> bool {
         true
     }
-    pub fn validate<J: Json>(&self, instance: &J) -> Result<(), Error> {
+    pub fn validate<J: Json>(&self, instance: &J) -> Result<(), ValidationError> {
         match self.iter_errors(instance).next() {
             None => Ok(()),
-            Some(error) => Err(error.into()),
+            Some(error) => Err(error),
         }
     }
     pub fn iter_errors<'v, 'i, J: Json>(
