@@ -57,6 +57,10 @@
 //!         let serialized = serde_json::to_string(&verbose).unwrap();
 //!     }
 //!
+//!     use jsonlike::prelude::*;
+//!     use std::borrow::Borrow;
+//!     use std::sync::Arc;
+//!
 //!     struct CustomResolver;
 //!
 //!     impl jsonschema::ReferenceResolver for CustomResolver {};
@@ -75,16 +79,45 @@
 //!         }
 //!     }
 //!
+//!     #[derive(Debug)]
+//!     struct AsciiKeyword {
+//!         size: usize
+//!     }
+//!
+//!     impl jsonschema::CustomKeyword for AsciiKeyword {
+//!         fn is_valid<J: Json>(&self, instance: &J) -> bool {
+//!             if let Some(string) = instance.as_string() {
+//!                  let string = string.borrow();
+//!                  string.len() == self.size && string.chars().all(|c| c.is_ascii())
+//!             } else {
+//!                 true
+//!             }
+//!         }
+//!     }
+//!
+//!     fn ascii_keyword(schema: &impl Json) -> Arc<dyn jsonschema::CustomKeyword> {
+//!         let x: Arc<dyn jsonschema::CustomKeyword> = Arc::new(AsciiKeyword { size: 42 });
+//!         x
+//!     }
+//!
 //!     let validator = jsonschema::ValidatorBuilder::default()
 //!         .resolver(CustomResolver)
 //!         .format("custom", my_custom_format)
 //!         .format("size", CustomSize { size: 5 })
+//!         .keyword(
+//!             "ascii",
+//!             |schema| {
+//!                 let x: Arc<dyn jsonschema::CustomKeyword> = Arc::new(AsciiKeyword { size: 42 });
+//!                 x
+//!             }
+//!         )
 //!         .build(&schema)
 //!         .await?;
 //!     let validator = jsonschema::blocking::ValidatorBuilder::default()
 //!         .resolver(CustomResolver)
 //!         .format("custom", my_custom_format)
 //!         .format("size", CustomSize { size: 5 })
+//!         .keyword("ascii", ascii_keyword)
 //!         .build(&schema)?;
 //!
 //!     Ok(())
@@ -113,6 +146,7 @@ pub use crate::{
         iter::ValidationErrorIter,
         iter_errors, try_evaluate, try_is_valid, try_iter_errors, validate, Validator,
     },
+    vocabulary::CustomKeyword,
 };
 
 #[cfg(all(test, feature = "serde_json"))]

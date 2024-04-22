@@ -5,6 +5,7 @@ use crate::{
     drafts::{draft_from_schema, Draft},
     output::Output,
     resolver::DefaultResolver,
+    vocabulary::{CustomKeyword, CustomKeywordConstructor},
     BuildError, Format, ReferenceResolver, ValidationError, ValidationErrorIter, Validator,
 };
 use jsonlike::Json;
@@ -59,28 +60,30 @@ pub fn validator_for<J: Json>(schema: &J) -> Result<Validator, BuildError> {
     ValidatorBuilder::default().draft(draft).build(schema)
 }
 
-pub struct ValidatorBuilder {
+pub struct ValidatorBuilder<'a, J: Json> {
     draft: Draft,
     resolver: Arc<dyn ReferenceResolver>,
     formats: HashMap<String, Arc<dyn Format>>,
+    keyword: HashMap<String, Arc<dyn CustomKeywordConstructor<'a, J>>>,
 }
 
-impl Default for ValidatorBuilder {
+impl<'a, J: Json> Default for ValidatorBuilder<'a, J> {
     fn default() -> Self {
         ValidatorBuilder {
             draft: Draft::latest(),
             resolver: Arc::new(DefaultResolver),
             formats: HashMap::default(),
+            keyword: HashMap::default(),
         }
     }
 }
 
-impl ValidatorBuilder {
-    pub fn build<J: Json>(&self, schema: &J) -> Result<Validator, BuildError> {
+impl<'a, J: Json> ValidatorBuilder<'a, J> {
+    pub fn build(&self, schema: &J) -> Result<Validator, BuildError> {
         // TODO: Resolve references
         compiler::compile::<J>(schema, self.draft)
     }
-    pub fn draft(&mut self, draft: Draft) -> &mut ValidatorBuilder {
+    pub fn draft(&mut self, draft: Draft) -> &mut ValidatorBuilder<'a, J> {
         self.draft = draft;
         self
     }
@@ -90,6 +93,14 @@ impl ValidatorBuilder {
     }
     pub fn format(&mut self, name: impl Into<String>, format: impl Format) -> &mut Self {
         self.formats.insert(name.into(), Arc::new(format));
+        self
+    }
+    pub fn keyword(
+        &mut self,
+        name: impl Into<String>,
+        function: impl CustomKeywordConstructor<'a, J>,
+    ) -> &mut Self {
+        self.keyword.insert(name.into(), Arc::new(function));
         self
     }
 }
