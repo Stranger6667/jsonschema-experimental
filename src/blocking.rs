@@ -1,10 +1,11 @@
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 use crate::{
     compiler,
     drafts::{draft_from_schema, Draft},
     output::Output,
-    BuildError, ReferenceResolver, ValidationError, ValidationErrorIter, Validator,
+    resolver::DefaultResolver,
+    BuildError, Format, ReferenceResolver, ValidationError, ValidationErrorIter, Validator,
 };
 use jsonlike::Json;
 
@@ -61,13 +62,15 @@ pub fn validator_for<J: Json>(schema: &J) -> Result<Validator, BuildError> {
 pub struct ValidatorBuilder {
     draft: Draft,
     resolver: Arc<dyn ReferenceResolver>,
+    formats: HashMap<String, Arc<dyn Format>>,
 }
 
 impl Default for ValidatorBuilder {
     fn default() -> Self {
         ValidatorBuilder {
             draft: Draft::latest(),
-            resolver: Arc::new(crate::resolver::DefaultResolver),
+            resolver: Arc::new(DefaultResolver),
+            formats: HashMap::default(),
         }
     }
 }
@@ -83,6 +86,10 @@ impl ValidatorBuilder {
     }
     pub fn resolver(&mut self, resolver: impl ReferenceResolver + 'static) -> &mut Self {
         self.resolver = Arc::new(resolver);
+        self
+    }
+    pub fn format(&mut self, name: impl Into<String>, format: impl Format) -> &mut Self {
+        self.formats.insert(name.into(), Arc::new(format));
         self
     }
 }

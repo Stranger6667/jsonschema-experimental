@@ -61,12 +61,30 @@
 //!
 //!     impl jsonschema::ReferenceResolver for CustomResolver {};
 //!
+//!     fn my_custom_format(value: &str) -> bool {
+//!        value.len() == 3
+//!     }
+//!
+//!     struct CustomSize {
+//!         size: usize,
+//!     }
+//!
+//!     impl jsonschema::Format for CustomSize {
+//!         fn is_valid(&self, value: &str) -> bool {
+//!             value.len() == self.size
+//!         }
+//!     }
+//!
 //!     let validator = jsonschema::ValidatorBuilder::default()
 //!         .resolver(CustomResolver)
+//!         .format("custom", my_custom_format)
+//!         .format("size", CustomSize { size: 5 })
 //!         .build(&schema)
 //!         .await?;
 //!     let validator = jsonschema::blocking::ValidatorBuilder::default()
 //!         .resolver(CustomResolver)
+//!         .format("custom", my_custom_format)
+//!         .format("size", CustomSize { size: 5 })
 //!         .build(&schema)?;
 //!
 //!     Ok(())
@@ -76,6 +94,7 @@ pub mod blocking;
 mod compiler;
 mod drafts;
 mod error;
+mod format;
 mod graph;
 pub mod output;
 mod resolver;
@@ -85,6 +104,7 @@ mod vocabulary;
 pub use crate::{
     drafts::Draft,
     error::{BuildError, ValidationError},
+    format::Format,
     output::Output,
     resolver::ReferenceResolver,
     validation::{
