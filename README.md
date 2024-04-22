@@ -141,7 +141,7 @@ use serde_json::json;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ... omitted for brevity
     let validator = jsonschema::ValidatorBuilder::default()
-        .with_draft(jsonschema::Draft::Draft7)
+        .draft(jsonschema::Draft::Draft7)
         .build(&schema).await?;
     validator.validate(&instance)?;
     Ok(())
@@ -158,11 +158,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ... omitted for brevity
     let validator = jsonschema::ValidatorBuilder::default()
         // I.e. a resolver that forbids references
-        .with_resolver(MyResolver::new())
+        .resolver(MyResolver::new())
         // Custom validator for the "format" keyword
-        .with_format("card_number", CardNumberFormat::new())
+        .format("card_number", CardNumberFormat::new())
         // Completely custom behavior for the `my-keyword` keyword
-        .with_keyword("my-keyword", CustomKeywordValidator::new(42))
+        .keyword("my-keyword", CustomKeywordValidator::new(42))
         .build(&schema)
         .await?;
     validator.validate(&instance)?;

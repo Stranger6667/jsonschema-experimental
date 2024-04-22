@@ -32,11 +32,11 @@
 //!     let validator = jsonschema::blocking::validator_for(&schema)?;
 //!     // Specific draft
 //!     let validator = jsonschema::ValidatorBuilder::default()
-//!         .with_draft(jsonschema::Draft::Draft04)
+//!         .draft(jsonschema::Draft::Draft04)
 //!         .build(&schema)
 //!         .await?;
 //!     let validator = jsonschema::blocking::ValidatorBuilder::default()
-//!         .with_draft(jsonschema::Draft::Draft04)
+//!         .draft(jsonschema::Draft::Draft04)
 //!         .build(&schema)?;
 //!
 //!     // Boolean result
@@ -56,6 +56,19 @@
 //!     {
 //!         let serialized = serde_json::to_string(&verbose).unwrap();
 //!     }
+//!
+//!     struct CustomResolver;
+//!
+//!     impl jsonschema::ReferenceResolver for CustomResolver {};
+//!
+//!     let validator = jsonschema::ValidatorBuilder::default()
+//!         .resolver(CustomResolver)
+//!         .build(&schema)
+//!         .await?;
+//!     let validator = jsonschema::blocking::ValidatorBuilder::default()
+//!         .resolver(CustomResolver)
+//!         .build(&schema)?;
+//!
 //!     Ok(())
 //! }
 //! ```
@@ -65,6 +78,7 @@ mod drafts;
 mod error;
 mod graph;
 pub mod output;
+mod resolver;
 mod validation;
 mod vocabulary;
 
@@ -72,6 +86,7 @@ pub use crate::{
     drafts::Draft,
     error::{BuildError, ValidationError},
     output::Output,
+    resolver::ReferenceResolver,
     validation::{
         builder::{validator_for, ValidatorBuilder},
         evaluate, is_valid,

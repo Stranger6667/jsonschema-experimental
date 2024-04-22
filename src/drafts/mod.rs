@@ -8,6 +8,7 @@ use std::borrow::Borrow;
 use crate::vocabulary::Keyword;
 use jsonlike::prelude::*;
 
+#[derive(Debug, Clone, Copy)]
 pub enum Draft {
     Draft04,
     Draft06,

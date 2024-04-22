@@ -1,8 +1,10 @@
+use std::sync::Arc;
+
 use crate::{
     compiler,
     drafts::{draft_from_schema, Draft},
     output::Output,
-    BuildError, ValidationError, ValidationErrorIter, Validator,
+    BuildError, ReferenceResolver, ValidationError, ValidationErrorIter, Validator,
 };
 use jsonlike::Json;
 
@@ -53,30 +55,34 @@ pub fn try_evaluate<'i, J: Json>(
 
 pub fn validator_for<J: Json>(schema: &J) -> Result<Validator, BuildError> {
     let draft = draft_from_schema(schema);
-    ValidatorBuilder::new(draft).build(schema)
+    ValidatorBuilder::default().draft(draft).build(schema)
 }
 
 pub struct ValidatorBuilder {
     draft: Draft,
+    resolver: Arc<dyn ReferenceResolver>,
 }
 
 impl Default for ValidatorBuilder {
     fn default() -> Self {
-        Self::new(Draft::latest())
+        ValidatorBuilder {
+            draft: Draft::latest(),
+            resolver: Arc::new(crate::resolver::DefaultResolver),
+        }
     }
 }
 
 impl ValidatorBuilder {
-    pub(crate) fn new(draft: Draft) -> Self {
-        Self { draft }
-    }
-
-    pub fn build<J: Json>(self, schema: &J) -> Result<Validator, BuildError> {
+    pub fn build<J: Json>(&self, schema: &J) -> Result<Validator, BuildError> {
         // TODO: Resolve references
         compiler::compile::<J>(schema, self.draft)
     }
-    pub fn with_draft(mut self, draft: Draft) -> Self {
+    pub fn draft(&mut self, draft: Draft) -> &mut ValidatorBuilder {
         self.draft = draft;
+        self
+    }
+    pub fn resolver(&mut self, resolver: impl ReferenceResolver + 'static) -> &mut Self {
+        self.resolver = Arc::new(resolver);
         self
     }
 }
