@@ -19,7 +19,7 @@ pub struct ValidatorBuilder<'a, J: Json> {
     pub(crate) draft: Draft,
     pub(crate) resolver: Arc<dyn ReferenceResolver>,
     pub(crate) formats: HashMap<String, Arc<dyn Format>>,
-    pub(crate) keyword: HashMap<String, Arc<dyn CustomKeywordFactory<'a, J>>>,
+    pub(crate) keywords: HashMap<String, Arc<dyn CustomKeywordFactory<'a, J>>>,
 }
 
 impl<'a, J: Json> Default for ValidatorBuilder<'a, J> {
@@ -28,7 +28,7 @@ impl<'a, J: Json> Default for ValidatorBuilder<'a, J> {
             draft: Draft::latest(),
             resolver: Arc::new(DefaultResolver),
             formats: HashMap::default(),
-            keyword: HashMap::default(),
+            keywords: HashMap::default(),
         }
     }
 }
@@ -53,9 +53,9 @@ impl<'a, J: Json> ValidatorBuilder<'a, J> {
     pub fn keyword(
         &mut self,
         name: impl Into<String>,
-        function: impl CustomKeywordFactory<'a, J>,
+        factory: impl CustomKeywordFactory<'a, J>,
     ) -> &mut Self {
-        self.keyword.insert(name.into(), Arc::new(function));
+        self.keywords.insert(name.into(), Arc::new(factory));
         self
     }
 }
