@@ -2,16 +2,16 @@ use crate::{ValidationError, Validator};
 use jsonlike::Json;
 use std::borrow::Cow;
 
-pub struct ValidationErrorIter<'validator, 'instance, J: Json> {
-    validator: Cow<'validator, Validator>,
-    instance: &'instance J,
+pub struct ValidationErrorIter<'v, 'i, J: Json> {
+    validator: Cow<'v, Validator>,
+    instance: &'i J,
 }
 
-impl<'validator, 'instance, J: Json> ValidationErrorIter<'validator, 'instance, J> {
+impl<'v, 'i, J: Json> ValidationErrorIter<'v, 'i, J> {
     pub(crate) fn new(
-        validator: Cow<'validator, Validator>,
-        instance: &'instance J,
-    ) -> ValidationErrorIter<'validator, 'instance, J> {
+        validator: Cow<'v, Validator>,
+        instance: &'i J,
+    ) -> ValidationErrorIter<'v, 'i, J> {
         ValidationErrorIter {
             validator,
             instance,
@@ -19,7 +19,7 @@ impl<'validator, 'instance, J: Json> ValidationErrorIter<'validator, 'instance, 
     }
 }
 
-impl<'validator, 'instance, J: Json> Iterator for ValidationErrorIter<'validator, 'instance, J> {
+impl<'v, 'i, J: Json> Iterator for ValidationErrorIter<'v, 'i, J> {
     type Item = ValidationError;
 
     fn next(&mut self) -> Option<Self::Item> {

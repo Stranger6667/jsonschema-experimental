@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use jsonlike::Json;
 pub(crate) mod builder;
 pub(crate) mod iter;
-use crate::{error::Error, graph, output::OutputFormat, vocabulary::Keyword, SchemaError};
+use crate::{error::Error, graph, output::Output, vocabulary::Keyword, SchemaError};
 use builder::validator_for;
 use iter::ValidationErrorIter;
 
@@ -38,19 +38,17 @@ pub async fn try_iter_errors<'schema, 'instance, J: Json>(
     Ok(validator.iter_errors_once(instance))
 }
 
-pub async fn evaluate<F: OutputFormat, J: Json>(instance: &J, schema: &J, format: F) -> F::Output {
-    try_evaluate(instance, schema, format)
+pub async fn evaluate<'i, J: Json>(instance: &'i J, schema: &J) -> Output<'static, 'i, J> {
+    try_evaluate(instance, schema)
         .await
         .expect("Invalid schema")
 }
 
-pub async fn try_evaluate<F: OutputFormat, J: Json>(
-    instance: &J,
+pub async fn try_evaluate<'i, J: Json>(
+    instance: &'i J,
     schema: &J,
-    format: F,
-) -> Result<F::Output, SchemaError> {
-    let validator = validator_for(schema).await?;
-    Ok(format.evaluate(&validator, instance))
+) -> Result<Output<'static, 'i, J>, SchemaError> {
+    Ok(validator_for(schema).await?.evaluate_once(instance))
 }
 
 #[derive(Debug, Clone)]
@@ -61,10 +59,6 @@ pub struct Validator {
 impl Validator {
     pub(crate) fn new(graph: graph::Graph<Keyword>) -> Self {
         Self { graph }
-    }
-
-    pub fn options() -> builder::ValidatorBuilder {
-        builder::ValidatorBuilder::default()
     }
 
     pub fn is_valid<J: Json>(&self, instance: &J) -> bool {
@@ -88,7 +82,10 @@ impl Validator {
     ) -> ValidationErrorIter<'static, '_, J> {
         ValidationErrorIter::new(Cow::Owned(self), instance)
     }
-    pub fn evaluate<F: OutputFormat, J: Json>(&self, instance: &J, format: F) -> F::Output {
-        format.evaluate(self, instance)
+    pub fn evaluate<'v, 'i, J: Json>(&'v self, instance: &'i J) -> Output<'v, 'i, J> {
+        Output::new(Cow::Borrowed(self), instance)
+    }
+    pub(crate) fn evaluate_once<J: Json>(self, instance: &J) -> Output<'static, '_, J> {
+        Output::new(Cow::Owned(self), instance)
     }
 }

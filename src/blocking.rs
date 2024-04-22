@@ -1,7 +1,7 @@
 use crate::{
     compiler,
     drafts::{draft_from_schema, Draft},
-    output::OutputFormat,
+    output::Output,
     Error, SchemaError, ValidationErrorIter, Validator,
 };
 use jsonlike::Json;
@@ -33,17 +33,15 @@ pub fn try_iter_errors<'instance, J: Json>(
     Ok(validator.iter_errors_once(instance))
 }
 
-pub fn evaluate<F: OutputFormat, J: Json>(instance: &J, schema: &J, format: F) -> F::Output {
-    try_evaluate(instance, schema, format).expect("Invalid schema")
+pub fn evaluate<'i, J: Json>(instance: &'i J, schema: &J) -> Output<'static, 'i, J> {
+    try_evaluate(instance, schema).expect("Invalid schema")
 }
 
-pub fn try_evaluate<F: OutputFormat, J: Json>(
-    instance: &J,
+pub fn try_evaluate<'i, J: Json>(
+    instance: &'i J,
     schema: &J,
-    format: F,
-) -> Result<F::Output, SchemaError> {
-    let validator = validator_for(schema)?;
-    Ok(format.evaluate(&validator, instance))
+) -> Result<Output<'static, 'i, J>, SchemaError> {
+    Ok(validator_for(schema)?.evaluate_once(instance))
 }
 
 pub fn validator_for<J: Json>(schema: &J) -> Result<Validator, SchemaError> {

@@ -1,7 +1,5 @@
 //!
 //! ```rust
-//! use jsonschema::{output, Draft};
-//!
 //! #[cfg(feature = "serde_json")]
 //! async fn test() -> Result<(), jsonschema::Error> {
 //!     let schema = serde_json::json!({"type": "integer"});
@@ -21,8 +19,8 @@
 //!         println!("{}", error);
 //!     }
 //!     // One-off collecting validation results into a struct conforming to the JSON Schema "Verbose" output format
-//!     let verbose = jsonschema::evaluate(&instance, &schema, output::Verbose).await;
-//!     let verbose = jsonschema::blocking::evaluate(&instance, &schema, output::Verbose);
+//!     let verbose = jsonschema::evaluate(&instance, &schema).await.verbose();
+//!     let verbose = jsonschema::blocking::evaluate(&instance, &schema).verbose();
 //!     // Serialize validation output to JSON (requires the `serde` feature)
 //!     #[cfg(feature = "serde")]
 //!     {
@@ -33,12 +31,12 @@
 //!     let validator = jsonschema::validator_for(&schema).await?;
 //!     let validator = jsonschema::blocking::validator_for(&schema)?;
 //!     // Specific draft
-//!     let validator = jsonschema::Validator::options()
-//!         .with_draft(Draft::Draft04)
+//!     let validator = jsonschema::ValidatorBuilder::default()
+//!         .with_draft(jsonschema::Draft::Draft04)
 //!         .build(&schema)
 //!         .await?;
 //!     let validator = jsonschema::blocking::ValidatorBuilder::default()
-//!         .with_draft(Draft::Draft04)
+//!         .with_draft(jsonschema::Draft::Draft04)
 //!         .build(&schema)?;
 //!
 //!     // Boolean result
@@ -52,7 +50,7 @@
 //!     }
 //!
 //!     // Collecting validation results into a struct conforming to the JSON Schema "Verbose" output format
-//!     let verbose = validator.evaluate(&instance, output::Verbose);
+//!     let verbose = validator.evaluate(&instance).verbose();
 //!     // Serialize validation output to JSON according to the verbose output format
 //!     #[cfg(feature = "serde")]
 //!     {
@@ -73,7 +71,7 @@ mod vocabulary;
 pub use crate::{
     drafts::Draft,
     error::{Error, SchemaError, ValidationError},
-    output::OutputFormat,
+    output::Output,
     validation::{
         builder::{validator_for, ValidatorBuilder},
         evaluate, is_valid,
@@ -99,9 +97,9 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_options() {
+    async fn test_builder() {
         let schema = json!({"type": "integer"});
-        let validator = crate::Validator::options()
+        let validator = crate::ValidatorBuilder::default()
             .build(&schema)
             .await
             .expect("Invalid schema");

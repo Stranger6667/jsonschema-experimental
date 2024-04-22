@@ -1,65 +1,39 @@
+use std::borrow::Cow;
+
 use crate::Validator;
 use jsonlike::Json;
 
-pub trait OutputFormat {
-    type Output;
-
-    fn evaluate<J: Json>(&self, validator: &Validator, instance: &J) -> Self::Output;
+pub struct Output<'v, 'i, J: Json> {
+    validator: Cow<'v, Validator>,
+    instance: &'i J,
 }
 
-pub struct Flag;
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct FlagOutput {
-    pub valid: bool,
-}
-
-impl OutputFormat for Flag {
-    type Output = FlagOutput;
-
-    fn evaluate<J: Json>(&self, validator: &Validator, instance: &J) -> Self::Output {
-        FlagOutput {
-            valid: validator.is_valid(instance),
+impl<'v, 'i, J: Json> Output<'v, 'i, J> {
+    pub(crate) fn new(validator: Cow<'v, Validator>, instance: &'i J) -> Output<'v, 'i, J> {
+        Output {
+            validator,
+            instance,
         }
     }
-}
-
-pub struct Basic;
-
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct BasicOutput(OutputUnit);
-
-impl OutputFormat for Basic {
-    type Output = BasicOutput;
-
-    fn evaluate<J: Json>(&self, validator: &Validator, instance: &J) -> Self::Output {
+    pub fn flag(&self) -> Flag {
+        Flag {
+            valid: self.validator.is_valid(self.instance),
+        }
+    }
+    pub fn basic(&self) -> OutputUnit {
+        todo!()
+    }
+    pub fn detailed(&self) -> OutputUnit {
+        todo!()
+    }
+    pub fn verbose(&self) -> OutputUnit {
         todo!()
     }
 }
 
-pub struct Detailed;
-
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct DetailedOutput(OutputUnit);
-
-impl OutputFormat for Detailed {
-    type Output = DetailedOutput;
-
-    fn evaluate<J: Json>(&self, validator: &Validator, instance: &J) -> Self::Output {
-        todo!()
-    }
-}
-
-pub struct Verbose;
-
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct VerboseOutput(OutputUnit);
-
-impl OutputFormat for Verbose {
-    type Output = VerboseOutput;
-
-    fn evaluate<J: Json>(&self, validator: &Validator, instance: &J) -> Self::Output {
-        todo!()
-    }
+pub struct Flag {
+    pub valid: bool,
 }
 
 // TODO: custom `Serialize` to match the spec
