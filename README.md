@@ -114,19 +114,18 @@ async fn main() -> Result<(), jsonschema::Error> {
 
 `jsonschema` supports multiple output formats for validation results in accordance with the JSON Schema specification:
 
-- `output::Flag`
-- `output::Basic`
-- `output::Detailed`
-- `output::Verbose`
+- `Flag`
+- `Basic`
+- `Detailed`
+- `Verbose`
 
 ```rust
-use jsonschema::output;
 use serde_json::json;
 
 #[tokio::main]
 async fn main() -> Result<(), jsonschema::Error> {
     // ... omitted for brevity
-    let verbose = jsonschema::evaluate(&instance, &schema, output::Verbose).await;
+    let verbose = jsonschema::evaluate(&instance, &schema).await.verbose();
     // Serialize validation output to JSON
     let serialized = serde_json::to_string(&verbose).unwrap();
     Ok(())
@@ -141,7 +140,9 @@ use serde_json::json;
 #[tokio::main]
 async fn main() -> Result<(), jsonschema::Error> {
     // ... omitted for brevity
-    let validator = jsonschema::Draft4Validator::from_schema(&schema).await?;
+    let validator = jsonschema::ValidatorBuilder::default()
+        .with_draft(jsonschema::Draft::Draft7)
+        .build(&schema).await?;
     validator.validate(&instance)?;
     Ok(())
 }
@@ -155,7 +156,7 @@ use serde_json::json;
 #[tokio::main]
 async fn main() -> Result<(), jsonschema::Error> {
     // ... omitted for brevity
-    let validator = jsonschema::Validator::options()
+    let validator = jsonschema::ValidatorBuilder::default()
         // I.e. a resolver that forbids references
         .with_resolver(MyResolver::new())
         // Custom validator for the "format" keyword
