@@ -109,7 +109,7 @@
 //!                 Arc::new(AsciiKeyword { size: 42 })
 //!             }
 //!         )
-//!         .keyword("also-ascii", ascii_keyword)
+//!         .keyword("also-ascii", ascii_keyword_factory)
 //!         .build(&schema)
 //!         .await?;
 //!     let validator = jsonschema::blocking::ValidatorBuilder::default()
