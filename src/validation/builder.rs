@@ -6,7 +6,7 @@ use crate::{
     compiler,
     drafts::{draft_from_schema, Draft},
     resolver::DefaultResolver,
-    vocabulary::CustomKeywordConstructor,
+    vocabulary::CustomKeywordFactory,
     BuildError, Format, ReferenceResolver, Validator,
 };
 
@@ -16,10 +16,10 @@ pub async fn validator_for<J: Json>(schema: &J) -> Result<Validator, BuildError>
 }
 
 pub struct ValidatorBuilder<'a, J: Json> {
-    draft: Draft,
-    resolver: Arc<dyn ReferenceResolver>,
-    formats: HashMap<String, Arc<dyn Format>>,
-    keyword: HashMap<String, Arc<dyn CustomKeywordConstructor<'a, J>>>,
+    pub(crate) draft: Draft,
+    pub(crate) resolver: Arc<dyn ReferenceResolver>,
+    pub(crate) formats: HashMap<String, Arc<dyn Format>>,
+    pub(crate) keyword: HashMap<String, Arc<dyn CustomKeywordFactory<'a, J>>>,
 }
 
 impl<'a, J: Json> Default for ValidatorBuilder<'a, J> {
@@ -53,7 +53,7 @@ impl<'a, J: Json> ValidatorBuilder<'a, J> {
     pub fn keyword(
         &mut self,
         name: impl Into<String>,
-        function: impl CustomKeywordConstructor<'a, J>,
+        function: impl CustomKeywordFactory<'a, J>,
     ) -> &mut Self {
         self.keyword.insert(name.into(), Arc::new(function));
         self

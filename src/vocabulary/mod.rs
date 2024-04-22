@@ -22,7 +22,7 @@ mod sealed {
     pub trait Sealed<J> {}
 }
 
-pub trait CustomKeywordConstructor<'a, J: Json>: Send + Sync + sealed::Sealed<J> + 'static {
+pub trait CustomKeywordFactory<'a, J: Json>: Send + Sync + sealed::Sealed<J> + 'static {
     fn init(&self, schema: &'a J) -> Arc<dyn CustomKeyword>
     where
         Self: Sized;
@@ -33,7 +33,7 @@ impl<'a, F, J: Json + 'a> sealed::Sealed<J> for F where
 {
 }
 
-impl<'a, F, J: Json + 'a> CustomKeywordConstructor<'a, J> for F
+impl<'a, F, J: Json + 'a> CustomKeywordFactory<'a, J> for F
 where
     F: Fn(&'a J) -> Arc<dyn CustomKeyword> + Send + Sync + 'static,
 {
