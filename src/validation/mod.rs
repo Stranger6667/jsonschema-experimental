@@ -98,3 +98,23 @@ impl Validator {
         Output::new(Cow::Owned(self), instance)
     }
 }
+
+#[cfg(all(test, feature = "serde_json"))]
+mod tests {
+    use serde_json::json;
+
+    #[tokio::test]
+    async fn test_validator_for() {
+        let schema = json!({"type": "integer"});
+        let validator = crate::validator_for(&schema).await.expect("Invalid schema");
+    }
+
+    #[tokio::test]
+    async fn test_builder() {
+        let schema = json!({"type": "integer"});
+        let validator = crate::ValidatorBuilder::default()
+            .build(&schema)
+            .await
+            .expect("Invalid schema");
+    }
+}

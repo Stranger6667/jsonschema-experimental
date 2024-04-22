@@ -148,36 +148,13 @@ pub use crate::{
     vocabulary::CustomKeyword,
 };
 
-#[cfg(all(test, feature = "serde_json"))]
+#[cfg(test)]
 mod tests {
-    use serde_json::json;
-
-    #[tokio::test]
-    async fn test_validator_for() {
-        let schema = json!({"type": "integer"});
-        let validator = crate::validator_for(&schema).await.expect("Invalid schema");
-    }
+    fn assert_send_sync<T: Send + Sync>() {}
 
     #[test]
-    fn test_validator_for_blocking() {
-        let schema = json!({"type": "integer"});
-        let validator = crate::blocking::validator_for(&schema).expect("Invalid schema");
-    }
-
-    #[tokio::test]
-    async fn test_builder() {
-        let schema = json!({"type": "integer"});
-        let validator = crate::ValidatorBuilder::default()
-            .build(&schema)
-            .await
-            .expect("Invalid schema");
-    }
-
-    #[test]
-    fn test_options_blocking() {
-        let schema = json!({"type": "integer"});
-        let validator = crate::blocking::ValidatorBuilder::default()
-            .build(&schema)
-            .expect("Invalid schema");
+    fn test_send_sync() {
+        assert_send_sync::<crate::Validator>();
+        assert_send_sync::<crate::ValidationError>();
     }
 }

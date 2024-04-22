@@ -96,3 +96,22 @@ impl<'a, J: Json> ValidatorBuilder<'a, J> {
         self
     }
 }
+
+#[cfg(all(test, feature = "serde_json"))]
+mod tests {
+    use serde_json::json;
+
+    #[test]
+    fn test_validator_for_blocking() {
+        let schema = json!({"type": "integer"});
+        let validator = crate::blocking::validator_for(&schema).expect("Invalid schema");
+    }
+
+    #[test]
+    fn test_options_blocking() {
+        let schema = json!({"type": "integer"});
+        let validator = crate::blocking::ValidatorBuilder::default()
+            .build(&schema)
+            .expect("Invalid schema");
+    }
+}
