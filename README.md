@@ -156,15 +156,31 @@ use serde_json::json;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ... omitted for brevity
+    struct CustomResolver;
+
+    impl jsonschema::ReferenceResolver for CustomResolver {};
+
+    fn my_custom_format(value: &str) -> bool {
+       value.len() == 3
+    }
+
+    struct CustomSize {
+        size: usize,
+    }
+
+    impl jsonschema::Format for CustomSize {
+        fn is_valid(&self, value: &str) -> bool {
+            value.len() == self.size
+        }
+    }
+
     let validator = jsonschema::ValidatorBuilder::default()
-        // I.e. a resolver that forbids references
-        .resolver(MyResolver::new())
-        // Custom validator for the "format" keyword
-        .format("card_number", CardNumberFormat::new())
-        // Completely custom behavior for the `my-keyword` keyword
-        .keyword("my-keyword", CustomKeywordValidator::new(42))
+        .resolver(CustomResolver)
+        .format("custom", my_custom_format)
+        .format("size", CustomSize { size: 5 })
         .build(&schema)
         .await?;
+
     validator.validate(&instance)?;
     Ok(())
 }
