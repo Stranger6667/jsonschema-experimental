@@ -95,8 +95,8 @@
 //!         }
 //!     }
 //!
-//!     fn ascii_keyword_factory(schema: &impl Json) -> Arc<dyn jsonschema::CustomKeyword> {
-//!         Arc::new(AsciiKeyword { size: 42 })
+//!     fn ascii_keyword_factory(schema: &impl Json) -> Box<dyn jsonschema::CustomKeyword> {
+//!         Box::new(AsciiKeyword { size: 42 })
 //!     }
 //!
 //!     let validator = jsonschema::ValidatorBuilder::default()
@@ -105,8 +105,8 @@
 //!         .format("size", CustomSize { size: 5 })
 //!         .keyword(
 //!             "ascii",
-//!             |schema| -> Arc<dyn jsonschema::CustomKeyword> {
-//!                 Arc::new(AsciiKeyword { size: 42 })
+//!             |schema| -> Box<dyn jsonschema::CustomKeyword> {
+//!                 Box::new(AsciiKeyword { size: 42 })
 //!             }
 //!         )
 //!         .keyword("also-ascii", ascii_keyword_factory)

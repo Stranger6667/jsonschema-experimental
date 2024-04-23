@@ -146,10 +146,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     impl jsonschema::ReferenceResolver for CustomResolver {};
 
+    // Stateless custom format checker
     fn custom_format(value: &str) -> bool {
        value.len() == 3
     }
 
+    // Stateful custom format checker
     struct CustomSize {
         size: usize,
     }

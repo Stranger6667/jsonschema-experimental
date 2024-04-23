@@ -50,11 +50,10 @@ impl<'a, J: Json> ValidatorBuilder<'a, J> {
         self.formats.insert(name.into(), Arc::new(format));
         self
     }
-    pub fn keyword(
-        &mut self,
-        name: impl Into<String>,
-        factory: impl CustomKeywordFactory<'a, J>,
-    ) -> &mut Self {
+    pub fn keyword<F>(&mut self, name: impl Into<String>, factory: F) -> &mut Self
+    where
+        F: CustomKeywordFactory<'a, J>,
+    {
         self.keywords.insert(name.into(), Arc::new(factory));
         self
     }
