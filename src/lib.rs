@@ -61,18 +61,18 @@
 //!
 //!     impl jsonschema::ReferenceResolver for CustomResolver {};
 //!
-//!     fn my_custom_format(value: &str) -> bool {
-//!        value.len() == 3
-//!     }
-//!
 //!     struct CustomSize {
 //!         size: usize,
 //!     }
 //!
-//!     impl jsonschema::Format for CustomSize {
+//!     impl jsonschema::CustomFormat for CustomSize {
 //!         fn is_valid(&self, value: &str) -> bool {
 //!             value.len() == self.size
 //!         }
+//!     }
+//!
+//!     fn custom_format_factory<J: jsonschema::Json>(schema: &J) -> Box<dyn jsonschema::CustomFormat> {
+//!         Box::new(CustomSize { size: 43 })
 //!     }
 //!
 //!     #[derive(Debug)]
@@ -96,8 +96,13 @@
 //!
 //!     let validator = jsonschema::ValidatorBuilder::default()
 //!         .resolver(CustomResolver)
-//!         .format("custom", my_custom_format)
-//!         .format("size", CustomSize { size: 5 })
+//!         .format(
+//!             "custom",
+//!             |schema| -> Box<dyn jsonschema::CustomFormat> {
+//!                 Box::new(CustomSize { size: 5 })
+//!             }
+//!         )
+//!         .format("custom-2", custom_format_factory)
 //!         .keyword(
 //!             "ascii",
 //!             |schema| -> Box<dyn jsonschema::CustomKeyword<_>> {
@@ -109,8 +114,7 @@
 //!         .await?;
 //!     let validator = jsonschema::blocking::ValidatorBuilder::default()
 //!         .resolver(CustomResolver)
-//!         .format("custom", my_custom_format)
-//!         .format("size", CustomSize { size: 5 })
+//!         .format("custom", custom_format_factory)
 //!         .keyword("ascii", ascii_keyword_factory)
 //!         .build(&schema)?;
 //!
@@ -132,7 +136,7 @@ mod vocabulary;
 pub use crate::{
     drafts::Draft,
     error::{BuildError, ValidationError},
-    format::Format,
+    format::CustomFormat,
     output::Output,
     resolver::ReferenceResolver,
     validation::{

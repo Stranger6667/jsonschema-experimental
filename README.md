@@ -144,12 +144,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     impl jsonschema::ReferenceResolver for CustomResolver {};
 
-    // Stateless custom format checker
     fn custom_format(value: &str) -> bool {
        value.len() == 3
     }
 
-    // Stateful custom format checker
     struct CustomSize {
         size: usize,
     }
@@ -160,7 +158,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    // Stateful custom keyword
+    fn custom_format_factory<J: jsonschema::Json>(schema: &J) -> Box<dyn jsonschema::Format> {
+        Box::new(CustomSize { size: 43 })
+    }
+
     #[derive(Debug)]
     struct AsciiKeyword {
         size: usize
@@ -184,8 +185,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let validator = jsonschema::ValidatorBuilder::default()
         .draft(jsonschema::Draft::Draft7)
         .resolver(CustomResolver)
-        .format("custom", custom_format)
-        .format("size", CustomSize { size: 5 })
+        .format(
+            "custom",
+            |schema| -> Box<dyn jsonschema::Format> {
+                Box::new(CustomSize { size: 5 })
+            }
+        )
+        .format("custom-2", custom_format_factory)
         .keyword(
             "ascii",
             |schema| -> Box<dyn jsonschema::CustomKeyword<_>> {

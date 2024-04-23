@@ -1,12 +1,27 @@
-pub trait Format: Send + Sync + 'static {
+use jsonlike::Json;
+
+pub trait CustomFormat: Send + Sync + 'static {
     fn is_valid(&self, value: &str) -> bool;
 }
 
-impl<F> Format for F
-where
-    F: Fn(&str) -> bool + Send + Sync + 'static,
+mod sealed {
+    pub trait Sealed<J> {}
+}
+
+pub trait CustomFormatFactory<'a, J: Json>: Send + Sync + sealed::Sealed<J> + 'a {
+    fn init(&self, schema: &'a J) -> Box<dyn CustomFormat>;
+}
+
+impl<'a, F, J: Json + 'a> sealed::Sealed<J> for F where
+    F: Fn(&'a J) -> Box<dyn CustomFormat> + Send + Sync + 'a
 {
-    fn is_valid(&self, value: &str) -> bool {
-        self(value)
+}
+
+impl<'a, F, J: Json + 'a> CustomFormatFactory<'a, J> for F
+where
+    F: Fn(&'a J) -> Box<dyn CustomFormat> + Send + Sync + 'a,
+{
+    fn init(&self, schema: &'a J) -> Box<dyn CustomFormat> {
+        self(schema)
     }
 }

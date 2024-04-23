@@ -5,9 +5,10 @@ use jsonlike::Json;
 use crate::{
     compiler,
     drafts::{draft_from_schema, Draft},
+    format::CustomFormatFactory,
     resolver::DefaultResolver,
     vocabulary::CustomKeywordFactory,
-    BuildError, Format, ReferenceResolver, Validator,
+    BuildError, ReferenceResolver, Validator,
 };
 
 pub async fn validator_for<J: Json>(schema: &J) -> Result<Validator<J>, BuildError> {
@@ -18,7 +19,7 @@ pub async fn validator_for<J: Json>(schema: &J) -> Result<Validator<J>, BuildErr
 pub struct ValidatorBuilder<'a, J: Json> {
     pub(crate) draft: Draft,
     pub(crate) resolver: Arc<dyn ReferenceResolver>,
-    pub(crate) formats: HashMap<String, Arc<dyn Format>>,
+    pub(crate) formats: HashMap<String, Arc<dyn CustomFormatFactory<'a, J>>>,
     pub(crate) keywords: HashMap<String, Arc<dyn CustomKeywordFactory<'a, J>>>,
 }
 
@@ -46,8 +47,11 @@ impl<'a, J: Json> ValidatorBuilder<'a, J> {
         self.resolver = Arc::new(resolver);
         self
     }
-    pub fn format(&mut self, name: impl Into<String>, format: impl Format) -> &mut Self {
-        self.formats.insert(name.into(), Arc::new(format));
+    pub fn format<F>(&mut self, name: impl Into<String>, factory: F) -> &mut Self
+    where
+        F: CustomFormatFactory<'a, J>,
+    {
+        self.formats.insert(name.into(), Arc::new(factory));
         self
     }
     pub fn keyword<F>(&mut self, name: impl Into<String>, factory: F) -> &mut Self

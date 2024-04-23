@@ -16,7 +16,6 @@ pub trait CustomKeyword<J: Json>: Send + Sync + core::fmt::Debug {
 }
 
 mod sealed {
-
     pub trait Sealed<J> {}
 }
 
