@@ -144,22 +144,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     impl jsonschema::ReferenceResolver for CustomResolver {};
 
-    fn custom_format(value: &str) -> bool {
-       value.len() == 3
-    }
-
-    struct CustomSize {
+    struct FixedSize {
         size: usize,
     }
 
-    impl jsonschema::Format for CustomSize {
+    impl jsonschema::Format for FixedSize {
         fn is_valid(&self, value: &str) -> bool {
             value.len() == self.size
         }
     }
 
-    fn custom_format_factory<J: jsonschema::Json>(schema: &J) -> Box<dyn jsonschema::Format> {
-        Box::new(CustomSize { size: 43 })
+    fn fixed_size_factory<J: jsonschema::Json>(schema: &J) -> Box<dyn jsonschema::Format> {
+        Box::new(FixedSize { size: 43 })
     }
 
     #[derive(Debug)]
@@ -167,7 +163,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         size: usize
     }
 
-    impl<J: jsonschema::Json> jsonschema::CustomKeyword<J> for AsciiKeyword {
+    impl<J: jsonschema::Json> jsonschema::Keyword<J> for AsciiKeyword {
         fn is_valid(&self, instance: &J) -> bool {
             if let Some(string) = instance.as_string().map(AsRef::as_ref) {
                  string.len() == self.size && string.chars().all(|c| c.is_ascii())
@@ -178,7 +174,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // Custom keyword factory
-    fn ascii_keyword_factory<J: jsonschema::Json>(schema: &J) -> Box<dyn jsonschema::CustomKeyword<J>> {
+    fn ascii_keyword_factory<J: jsonschema::Json>(schema: &J) -> Box<dyn jsonschema::Keyword<J>> {
         Box::new(AsciiKeyword { size: 42 })
     }
 
@@ -186,15 +182,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .draft(jsonschema::Draft::Draft7)
         .resolver(CustomResolver)
         .format(
-            "custom",
+            "fixed-size-1",
             |schema| -> Box<dyn jsonschema::Format> {
-                Box::new(CustomSize { size: 5 })
+                Box::new(FixedSize { size: 5 })
             }
         )
-        .format("custom-2", custom_format_factory)
+        .format("fixed-size-2", fixed_size_factory)
         .keyword(
             "ascii",
-            |schema| -> Box<dyn jsonschema::CustomKeyword<_>> {
+            |schema| -> Box<dyn jsonschema::Keyword<_>> {
                 Box::new(AsciiKeyword { size: 42 })
             }
         )

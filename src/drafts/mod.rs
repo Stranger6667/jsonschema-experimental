@@ -4,7 +4,7 @@ mod draft07;
 mod draft201909;
 mod draft202012;
 
-use crate::vocabulary::Keyword;
+use crate::vocabulary::KeywordValue;
 use jsonlike::prelude::*;
 
 #[derive(Debug, Clone, Copy)]
@@ -20,7 +20,7 @@ impl Draft {
     pub fn latest() -> Self {
         Self::Draft202012
     }
-    pub(crate) fn get_keyword<J: Json>(&self, key: &str, value: &J) -> Option<Keyword<J>> {
+    pub(crate) fn get_keyword<J: Json>(&self, key: &str, value: &J) -> Option<KeywordValue<J>> {
         match self {
             Draft::Draft04 => draft04::get_keyword(key, value),
             Draft::Draft06 => draft06::get_keyword(key, value),

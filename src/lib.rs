@@ -57,22 +57,22 @@
 //!         let serialized = serde_json::to_string(&verbose).unwrap();
 //!     }
 //!
-//!     struct CustomResolver;
+//!     struct Resolver;
 //!
-//!     impl jsonschema::ReferenceResolver for CustomResolver {};
+//!     impl jsonschema::ReferenceResolver for Resolver {};
 //!
-//!     struct CustomSize {
+//!     struct FixedSize {
 //!         size: usize,
 //!     }
 //!
-//!     impl jsonschema::CustomFormat for CustomSize {
+//!     impl jsonschema::Format for FixedSize {
 //!         fn is_valid(&self, value: &str) -> bool {
 //!             value.len() == self.size
 //!         }
 //!     }
 //!
-//!     fn custom_format_factory<J: jsonschema::Json>(schema: &J) -> Box<dyn jsonschema::CustomFormat> {
-//!         Box::new(CustomSize { size: 43 })
+//!     fn fixed_size_factory<J: jsonschema::Json>(schema: &J) -> Box<dyn jsonschema::Format> {
+//!         Box::new(FixedSize { size: 43 })
 //!     }
 //!
 //!     #[derive(Debug)]
@@ -80,7 +80,7 @@
 //!         size: usize
 //!     }
 //!
-//!     impl<J: jsonschema::Json> jsonschema::CustomKeyword<J> for AsciiKeyword {
+//!     impl<J: jsonschema::Json> jsonschema::Keyword<J> for AsciiKeyword {
 //!         fn is_valid(&self, instance: &J) -> bool {
 //!             if let Some(string) = instance.as_string().map(AsRef::as_ref) {
 //!                  string.len() == self.size && string.chars().all(|c| c.is_ascii())
@@ -90,22 +90,22 @@
 //!         }
 //!     }
 //!
-//!     fn ascii_keyword_factory<J: jsonschema::Json>(schema: &J) -> Box<dyn jsonschema::CustomKeyword<J>> {
+//!     fn ascii_keyword_factory<J: jsonschema::Json>(schema: &J) -> Box<dyn jsonschema::Keyword<J>> {
 //!         Box::new(AsciiKeyword { size: 42 })
 //!     }
 //!
 //!     let validator = jsonschema::ValidatorBuilder::default()
-//!         .resolver(CustomResolver)
+//!         .resolver(Resolver)
 //!         .format(
 //!             "custom",
-//!             |schema| -> Box<dyn jsonschema::CustomFormat> {
-//!                 Box::new(CustomSize { size: 5 })
+//!             |schema| -> Box<dyn jsonschema::Format> {
+//!                 Box::new(FixedSize { size: 5 })
 //!             }
 //!         )
-//!         .format("custom-2", custom_format_factory)
+//!         .format("custom-2", fixed_size_factory)
 //!         .keyword(
 //!             "ascii",
-//!             |schema| -> Box<dyn jsonschema::CustomKeyword<_>> {
+//!             |schema| -> Box<dyn jsonschema::Keyword<_>> {
 //!                 Box::new(AsciiKeyword { size: 42 })
 //!             }
 //!         )
@@ -113,8 +113,8 @@
 //!         .build(&schema)
 //!         .await?;
 //!     let validator = jsonschema::blocking::ValidatorBuilder::default()
-//!         .resolver(CustomResolver)
-//!         .format("custom", custom_format_factory)
+//!         .resolver(Resolver)
+//!         .format("custom", fixed_size_factory)
 //!         .keyword("ascii", ascii_keyword_factory)
 //!         .build(&schema)?;
 //!
@@ -136,7 +136,7 @@ mod vocabulary;
 pub use crate::{
     drafts::Draft,
     error::{BuildError, ValidationError},
-    format::CustomFormat,
+    format::Format,
     output::Output,
     resolver::ReferenceResolver,
     validation::{
@@ -145,7 +145,7 @@ pub use crate::{
         iter::ValidationErrorIter,
         iter_errors, try_evaluate, try_is_valid, try_iter_errors, validate, Validator,
     },
-    vocabulary::CustomKeyword,
+    vocabulary::Keyword,
 };
 pub use jsonlike::Json;
 

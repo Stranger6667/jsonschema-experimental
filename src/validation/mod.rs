@@ -2,7 +2,7 @@ use jsonlike::Json;
 pub(crate) mod builder;
 pub(crate) mod iter;
 use crate::{
-    cow::LeanCow, graph, output::Output, vocabulary::Keyword, BuildError, ValidationError,
+    cow::LeanCow, graph, output::Output, vocabulary::KeywordValue, BuildError, ValidationError,
 };
 use builder::validator_for;
 use iter::ValidationErrorIter;
@@ -62,11 +62,11 @@ pub async fn try_evaluate<'i, J: Json>(
 
 #[derive(Debug, Clone)]
 pub struct Validator<J: Json> {
-    graph: graph::Graph<Keyword<J>>,
+    graph: graph::Graph<KeywordValue<J>>,
 }
 
 impl<J: Json> Validator<J> {
-    pub(crate) fn new(graph: graph::Graph<Keyword<J>>) -> Self {
+    pub(crate) fn new(graph: graph::Graph<KeywordValue<J>>) -> Self {
         Self { graph }
     }
 

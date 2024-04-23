@@ -1,10 +1,10 @@
 use crate::{
     compiler,
     drafts::{draft_from_schema, Draft},
-    format::CustomFormatFactory,
+    format::FormatFactory,
     output::Output,
     validation::builder::ValidatorBuilder as AsyncValidatorBuilder,
-    vocabulary::CustomKeywordFactory,
+    vocabulary::KeywordFactory,
     BuildError, ReferenceResolver, ValidationError, ValidationErrorIter, Validator,
 };
 use jsonlike::Json;
@@ -86,14 +86,14 @@ impl<'a, J: Json> ValidatorBuilder<'a, J> {
     }
     pub fn format<F>(&mut self, name: impl Into<String>, factory: F) -> &mut Self
     where
-        F: CustomFormatFactory<'a, J>,
+        F: FormatFactory<'a, J>,
     {
         self.inner.format(name, factory);
         self
     }
     pub fn keyword<F>(&mut self, name: impl Into<String>, factory: F) -> &mut Self
     where
-        F: CustomKeywordFactory<'a, J>,
+        F: KeywordFactory<'a, J>,
     {
         self.inner.keyword(name, factory);
         self
