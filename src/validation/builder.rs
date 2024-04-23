@@ -10,7 +10,7 @@ use crate::{
     BuildError, Format, ReferenceResolver, Validator,
 };
 
-pub async fn validator_for<J: Json>(schema: &J) -> Result<Validator, BuildError> {
+pub async fn validator_for<J: Json>(schema: &J) -> Result<Validator<J>, BuildError> {
     let draft = draft_from_schema(schema);
     ValidatorBuilder::default().draft(draft).build(schema).await
 }
@@ -34,7 +34,7 @@ impl<'a, J: Json> Default for ValidatorBuilder<'a, J> {
 }
 
 impl<'a, J: Json> ValidatorBuilder<'a, J> {
-    pub async fn build(&self, schema: &J) -> Result<Validator, BuildError> {
+    pub async fn build(&self, schema: &J) -> Result<Validator<J>, BuildError> {
         // TODO: Resolve references
         compiler::compile::<J>(schema, self.draft)
     }
@@ -56,5 +56,11 @@ impl<'a, J: Json> ValidatorBuilder<'a, J> {
     {
         self.keywords.insert(name.into(), Arc::new(factory));
         self
+    }
+    fn nnn(&self, v: &'a J) {
+        if let Some(keyword) = self.keywords.get("foo") {
+            let k = keyword.init(v);
+            k.is_valid(v);
+        }
     }
 }

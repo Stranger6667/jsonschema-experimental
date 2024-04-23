@@ -53,7 +53,7 @@ pub fn try_evaluate<'i, J: Json>(
     Ok(validator_for(schema)?.evaluate_once(instance))
 }
 
-pub fn validator_for<J: Json>(schema: &J) -> Result<Validator, BuildError> {
+pub fn validator_for<J: Json>(schema: &J) -> Result<Validator<J>, BuildError> {
     let draft = draft_from_schema(schema);
     ValidatorBuilder::default().draft(draft).build(schema)
 }
@@ -71,7 +71,7 @@ impl<'a, J: Json> Default for ValidatorBuilder<'a, J> {
 }
 
 impl<'a, J: Json> ValidatorBuilder<'a, J> {
-    pub fn build(&self, schema: &J) -> Result<Validator, BuildError> {
+    pub fn build(&self, schema: &J) -> Result<Validator<J>, BuildError> {
         // TODO: Resolve references
         compiler::compile::<J>(schema, self.inner.draft)
     }

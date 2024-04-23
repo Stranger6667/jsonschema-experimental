@@ -1,7 +1,7 @@
 use crate::{drafts::Draft, graph, BuildError, Validator};
 use jsonlike::{Json, JsonObject};
 
-pub(crate) fn compile<J: Json>(schema: &J, draft: Draft) -> Result<Validator, BuildError> {
+pub(crate) fn compile<J: Json>(schema: &J, draft: Draft) -> Result<Validator<J>, BuildError> {
     let mut graph = graph::Graph::new();
     if let Some(obj) = schema.as_object() {
         for (key, value) in obj.iter() {

@@ -136,7 +136,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ```rust
 use serde_json::json;
-use jsonschema::Json;
 use jsonlike::prelude::*;
 
 #[tokio::main]
@@ -167,8 +166,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         size: usize
     }
 
-    impl jsonschema::CustomKeyword for AsciiKeyword {
-        fn is_valid<J: Json>(&self, instance: &J) -> bool {
+    impl<J: Json> jsonschema::CustomKeyword<J> for AsciiKeyword {
+        fn is_valid(&self, instance: &J) -> bool {
             if let Some(string) = instance.as_string() {
                  let string = string.borrow();
                  string.len() == self.size && string.chars().all(|c| c.is_ascii())
@@ -178,8 +177,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    fn ascii_keyword_factory(schema: &impl Json) -> Arc<dyn jsonschema::CustomKeyword> {
-        Arc::new(AsciiKeyword { size: 42 })
+    fn ascii_keyword_factory(schema: &impl Json) -> Box<dyn jsonschema::CustomKeyword<J>> {
+        Box::new(AsciiKeyword { size: 42 })
     }
 
     let validator = jsonschema::ValidatorBuilder::default()
@@ -189,8 +188,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .format("size", CustomSize { size: 5 })
         .keyword(
             "ascii",
-            |schema| -> Arc<dyn jsonschema::CustomKeyword> {
-                Arc::new(AsciiKeyword { size: 42 })
+            |schema| -> Box<dyn jsonschema::CustomKeyword<_>> {
+                Box::new(AsciiKeyword { size: 42 })
             }
         )
         .keyword("also-ascii", ascii_keyword_factory)

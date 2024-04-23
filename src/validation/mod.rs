@@ -1,9 +1,9 @@
-use std::borrow::Cow;
-
 use jsonlike::Json;
 pub(crate) mod builder;
 pub(crate) mod iter;
-use crate::{graph, output::Output, vocabulary::Keyword, BuildError, ValidationError};
+use crate::{
+    cow::LeanCow, graph, output::Output, vocabulary::Keyword, BuildError, ValidationError,
+};
 use builder::validator_for;
 use iter::ValidationErrorIter;
 
@@ -61,41 +61,35 @@ pub async fn try_evaluate<'i, J: Json>(
 }
 
 #[derive(Debug, Clone)]
-pub struct Validator {
-    graph: graph::Graph<Keyword>,
+pub struct Validator<J: Json> {
+    graph: graph::Graph<Keyword<J>>,
 }
 
-impl Validator {
-    pub(crate) fn new(graph: graph::Graph<Keyword>) -> Self {
+impl<J: Json> Validator<J> {
+    pub(crate) fn new(graph: graph::Graph<Keyword<J>>) -> Self {
         Self { graph }
     }
 
-    pub fn is_valid<J: Json>(&self, instance: &J) -> bool {
+    pub fn is_valid(&self, instance: &J) -> bool {
         true
     }
-    pub fn validate<J: Json>(&self, instance: &J) -> Result<(), ValidationError> {
+    pub fn validate(&self, instance: &J) -> Result<(), ValidationError> {
         match self.iter_errors(instance).next() {
             None => Ok(()),
             Some(error) => Err(error),
         }
     }
-    pub fn iter_errors<'v, 'i, J: Json>(
-        &'v self,
-        instance: &'i J,
-    ) -> ValidationErrorIter<'v, 'i, J> {
-        ValidationErrorIter::new(Cow::Borrowed(self), instance)
+    pub fn iter_errors<'v, 'i>(&'v self, instance: &'i J) -> ValidationErrorIter<'v, 'i, J> {
+        ValidationErrorIter::new(LeanCow::Borrowed(self), instance)
     }
-    pub(crate) fn iter_errors_once<J: Json>(
-        self,
-        instance: &J,
-    ) -> ValidationErrorIter<'static, '_, J> {
-        ValidationErrorIter::new(Cow::Owned(self), instance)
+    pub(crate) fn iter_errors_once(self, instance: &J) -> ValidationErrorIter<'static, '_, J> {
+        ValidationErrorIter::new(LeanCow::Owned(self), instance)
     }
-    pub fn evaluate<'v, 'i, J: Json>(&'v self, instance: &'i J) -> Output<'v, 'i, J> {
-        Output::new(Cow::Borrowed(self), instance)
+    pub fn evaluate<'v, 'i>(&'v self, instance: &'i J) -> Output<'v, 'i, J> {
+        Output::new(LeanCow::Borrowed(self), instance)
     }
-    pub(crate) fn evaluate_once<J: Json>(self, instance: &J) -> Output<'static, '_, J> {
-        Output::new(Cow::Owned(self), instance)
+    pub(crate) fn evaluate_once(self, instance: &J) -> Output<'static, '_, J> {
+        Output::new(LeanCow::Owned(self), instance)
     }
 }
 

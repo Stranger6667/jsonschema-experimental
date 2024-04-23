@@ -1,15 +1,13 @@
-use std::borrow::Cow;
-
-use crate::Validator;
+use crate::{cow::LeanCow, Validator};
 use jsonlike::Json;
 
 pub struct Output<'v, 'i, J: Json> {
-    validator: Cow<'v, Validator>,
+    validator: LeanCow<'v, Validator<J>>,
     instance: &'i J,
 }
 
 impl<'v, 'i, J: Json> Output<'v, 'i, J> {
-    pub(crate) fn new(validator: Cow<'v, Validator>, instance: &'i J) -> Output<'v, 'i, J> {
+    pub(crate) fn new(validator: LeanCow<'v, Validator<J>>, instance: &'i J) -> Output<'v, 'i, J> {
         Output {
             validator,
             instance,

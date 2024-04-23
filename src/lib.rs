@@ -59,7 +59,6 @@
 //!
 //!     use jsonlike::prelude::*;
 //!     use std::borrow::Borrow;
-//!     use std::sync::Arc;
 //!
 //!     struct CustomResolver;
 //!
@@ -84,8 +83,8 @@
 //!         size: usize
 //!     }
 //!
-//!     impl jsonschema::CustomKeyword for AsciiKeyword {
-//!         fn is_valid<J: Json>(&self, instance: &J) -> bool {
+//!     impl<J: Json> jsonschema::CustomKeyword<J> for AsciiKeyword {
+//!         fn is_valid(&self, instance: &J) -> bool {
 //!             if let Some(string) = instance.as_string() {
 //!                  let string = string.borrow();
 //!                  string.len() == self.size && string.chars().all(|c| c.is_ascii())
@@ -95,7 +94,7 @@
 //!         }
 //!     }
 //!
-//!     fn ascii_keyword_factory(schema: &impl Json) -> Box<dyn jsonschema::CustomKeyword> {
+//!     fn ascii_keyword_factory<J: Json>(schema: &J) -> Box<dyn jsonschema::CustomKeyword<J>> {
 //!         Box::new(AsciiKeyword { size: 42 })
 //!     }
 //!
@@ -105,7 +104,7 @@
 //!         .format("size", CustomSize { size: 5 })
 //!         .keyword(
 //!             "ascii",
-//!             |schema| -> Box<dyn jsonschema::CustomKeyword> {
+//!             |schema| -> Box<dyn jsonschema::CustomKeyword<_>> {
 //!                 Box::new(AsciiKeyword { size: 42 })
 //!             }
 //!         )
@@ -124,6 +123,7 @@
 //! ```
 pub mod blocking;
 mod compiler;
+mod cow;
 mod drafts;
 mod error;
 mod format;
@@ -154,7 +154,7 @@ mod tests {
 
     #[test]
     fn test_send_sync() {
-        assert_send_sync::<crate::Validator>();
+        assert_send_sync::<crate::Validator<serde_json::Value>>();
         assert_send_sync::<crate::ValidationError>();
     }
 }
