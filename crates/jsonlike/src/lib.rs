@@ -134,7 +134,7 @@ pub trait JsonNumber<'a> {
 
 #[cfg(test)]
 mod tests {
-    use std::{borrow::Borrow, panic};
+    use std::panic;
 
     use crate::prelude::*;
 
@@ -163,7 +163,7 @@ mod tests {
             .as_object()
             .and_then(|obj| obj.get("c"))
             .and_then(|k| k.as_string())
-            .map(|s| s.borrow().to_owned())
+            .map(|s| s.to_owned())
             .expect("Key exists");
         assert_eq!(val, "d");
     }
@@ -241,7 +241,7 @@ mod tests {
 
     pub(crate) fn assert_as_string(value: &impl Json, expected: Option<&str>) {
         match (value.as_string(), expected) {
-            (Some(s), Some(e)) => assert_eq!(s.borrow(), e),
+            (Some(s), Some(e)) => assert_eq!(s.as_ref(), e),
             (None, None) => {}
             _ => panic!("Value is not {:?}", expected),
         }
@@ -292,7 +292,7 @@ mod tests {
 
     pub(crate) fn assert_as_boolean(value: &impl Json, expected: Option<bool>) {
         match (value.as_boolean(), expected) {
-            (Some(s), Some(e)) => assert_eq!(*s.borrow(), e),
+            (Some(s), Some(e)) => assert_eq!(s, e),
             (None, None) => {}
             _ => panic!("Value is not {:?}", expected),
         }

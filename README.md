@@ -168,8 +168,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     impl<J: jsonschema::Json> jsonschema::CustomKeyword<J> for AsciiKeyword {
         fn is_valid(&self, instance: &J) -> bool {
-            if let Some(string) = instance.as_string() {
-                 let string = string.borrow();
+            if let Some(string) = instance.as_string().map(AsRef::as_ref) {
                  string.len() == self.size && string.chars().all(|c| c.is_ascii())
             } else {
                 true

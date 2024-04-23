@@ -342,7 +342,7 @@ mod tests {
     fn test_equal(factory: fn(Python<'_>) -> &PyAny) {
         pytest(|py| {
             let value = factory(py);
-            assert!(value.equal(&value));
+            assert!(value.equal(value));
             let other = pyrun(py, "'something else'");
             assert!(!value.equal(other));
         });
