@@ -57,8 +57,6 @@
 //!         let serialized = serde_json::to_string(&verbose).unwrap();
 //!     }
 //!
-//!     use std::borrow::Borrow;
-//!
 //!     struct CustomResolver;
 //!
 //!     impl jsonschema::ReferenceResolver for CustomResolver {};
@@ -84,8 +82,7 @@
 //!
 //!     impl<J: jsonschema::Json> jsonschema::CustomKeyword<J> for AsciiKeyword {
 //!         fn is_valid(&self, instance: &J) -> bool {
-//!             if let Some(string) = instance.as_string() {
-//!                  let string = string.borrow();
+//!             if let Some(string) = instance.as_string().map(AsRef::as_ref) {
 //!                  string.len() == self.size && string.chars().all(|c| c.is_ascii())
 //!             } else {
 //!                 true

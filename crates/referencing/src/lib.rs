@@ -132,8 +132,6 @@ impl<'a, D: Json> Resolver<'a, D> {
 
 #[cfg(test)]
 mod tests {
-    use std::borrow::Borrow;
-
     use jsonlike::prelude::*;
 
     use crate::{
@@ -157,7 +155,7 @@ mod tests {
                 .as_object()
                 .and_then(|obj| obj.get("ID"))
                 .and_then(Json::as_string)
-                .map(Borrow::borrow)
+                .map(AsRef::as_ref)
         }
 
         fn subresources_of<'a>(

@@ -1,7 +1,6 @@
 mod impls;
 
 use core::fmt;
-use std::borrow::Borrow;
 mod error;
 
 pub use error::JsonError;
@@ -13,7 +12,7 @@ pub mod prelude {
 pub trait Json: fmt::Debug {
     type Object: JsonObject<Value = Self>;
     type Array: JsonArray<Element = Self>;
-    type String: PartialEq<str> + Eq + fmt::Debug + Borrow<str> + ?Sized;
+    type String: PartialEq<str> + Eq + fmt::Debug + AsRef<str> + ?Sized;
     type Number: for<'a> JsonNumber<'a>;
 
     fn as_object(&self) -> Option<&Self::Object> {

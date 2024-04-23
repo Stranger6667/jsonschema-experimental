@@ -1,5 +1,3 @@
-use std::borrow::Borrow;
-
 use jsonlike::prelude::*;
 
 use crate::{
@@ -16,7 +14,7 @@ fn dollar_id<J: Json>(contents: &J) -> Option<String> {
         .as_object()
         .and_then(|obj| obj.get("$id"))
         .and_then(|id| id.as_string())
-        .map(|id| id.borrow().to_owned())
+        .map(|id| id.as_ref().to_owned())
 }
 
 fn legacy_id<J: Json>(contents: &J) -> Option<&str> {
@@ -27,8 +25,7 @@ fn legacy_id<J: Json>(contents: &J) -> Option<&str> {
         return None;
     }
     if let Some(id) = object.get("id").and_then(Json::as_string) {
-        // TODO: Borrow is not really convenient - Deref would be nice
-        let id = id.borrow();
+        let id = id.as_ref();
         if !id.starts_with('#') {
             return Some(id);
         }
@@ -64,12 +61,12 @@ fn anchor<J: Json>(contents: &J) -> AnchorIter<'_, J> {
     };
     if let Some(anchor) = object.get("$anchor").and_then(Json::as_string) {
         let anchor: Box<dyn Resolvable<J>> =
-            Box::new(Anchor::new(anchor.borrow().to_owned(), JsonPath::new()));
+            Box::new(Anchor::new(anchor.as_ref().to_owned(), JsonPath::new()));
         return Box::new(std::iter::once(anchor));
     }
     if let Some(dynamic_anchor) = object.get("$dynamicAnchor").and_then(Json::as_string) {
         let anchor: Box<dyn Resolvable<J>> = Box::new(DynamicAnchor::new(
-            dynamic_anchor.borrow().to_owned(),
+            dynamic_anchor.as_ref().to_owned(),
             JsonPath::new(),
         ));
         return Box::new(std::iter::once(anchor));
@@ -83,7 +80,7 @@ fn anchor_2019<J: Json>(contents: &J) -> AnchorIter<'_, J> {
     };
     if let Some(anchor) = object.get("$anchor").and_then(Json::as_string) {
         let anchor: Box<dyn Resolvable<J>> =
-            Box::new(Anchor::new(anchor.borrow().to_owned(), JsonPath::new()));
+            Box::new(Anchor::new(anchor.as_ref().to_owned(), JsonPath::new()));
         return Box::new(std::iter::once(anchor));
     }
     Box::new(std::iter::empty())
@@ -94,7 +91,7 @@ fn legacy_anchor_in_id<J: Json>(contents: &J) -> AnchorIter<'_, J> {
         return Box::new(std::iter::empty());
     };
     if let Some(id) = object.get("$id").and_then(Json::as_string) {
-        if let Some(id) = id.borrow().strip_prefix('#') {
+        if let Some(id) = id.as_ref().strip_prefix('#') {
             // TODO: build proper json path
             let anchor: Box<dyn Resolvable<J>> =
                 Box::new(Anchor::new(id.to_owned(), JsonPath::new()));

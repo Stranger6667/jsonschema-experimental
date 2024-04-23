@@ -1,5 +1,5 @@
 use aho_corasick::AhoCorasick;
-use std::{borrow::Borrow, collections::HashMap};
+use std::collections::HashMap;
 use url::Url;
 
 use jsonlike::prelude::*;
@@ -58,7 +58,7 @@ impl<D: Json> Resource<D> {
         // TODO: Properly handle no spec
         let specification = if let Some(object) = contents.as_object() {
             if let Some(dialect_id) = object.get("$schema").and_then(Json::as_string) {
-                match dialect_id.borrow() {
+                match dialect_id.as_ref() {
                     "http://json-schema.org/draft-04/schema" => Draft4.boxed(),
                     _ => default_specification.unwrap(),
                 }
@@ -209,7 +209,7 @@ impl<'a, D: Json> SubResource<'a, D> {
         // TODO: Properly handle no spec
         let specification = if let Some(object) = contents.as_object() {
             if let Some(dialect_id) = object.get("$schema").and_then(Json::as_string) {
-                match dialect_id.borrow() {
+                match dialect_id.as_ref() {
                     "http://json-schema.org/draft-04/schema" => Draft4.boxed(),
                     _ => default_specification.unwrap(),
                 }

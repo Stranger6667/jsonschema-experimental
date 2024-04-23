@@ -3,7 +3,6 @@ mod draft06;
 mod draft07;
 mod draft201909;
 mod draft202012;
-use std::borrow::Borrow;
 
 use crate::vocabulary::Keyword;
 use jsonlike::prelude::*;
@@ -57,7 +56,7 @@ pub(crate) fn from_url(mut url: &str) -> Option<Draft> {
 pub(crate) fn draft_from_schema(schema: &impl Json) -> Draft {
     if let Some(object) = schema.as_object() {
         if let Some(url) = object.get("$schema").and_then(Json::as_string) {
-            from_url(url.borrow()).unwrap_or_else(Draft::latest)
+            from_url(url.as_ref()).unwrap_or_else(Draft::latest)
         } else {
             Draft::latest()
         }
