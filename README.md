@@ -173,7 +173,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    // Custom keyword factory
     fn ascii_keyword_factory<J: jsonschema::Json>(schema: &J) -> Box<dyn jsonschema::Keyword<J>> {
         Box::new(AsciiKeyword { size: 42 })
     }
