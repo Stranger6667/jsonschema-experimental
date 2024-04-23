@@ -154,6 +154,7 @@ mod tests {
 
     #[test]
     fn test_send_sync() {
+        #[cfg(feature = "serde_json")]
         assert_send_sync::<crate::Validator<serde_json::Value>>();
         assert_send_sync::<crate::ValidationError>();
     }
