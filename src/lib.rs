@@ -57,7 +57,6 @@
 //!         let serialized = serde_json::to_string(&verbose).unwrap();
 //!     }
 //!
-//!     use jsonlike::prelude::*;
 //!     use std::borrow::Borrow;
 //!
 //!     struct CustomResolver;
@@ -83,7 +82,7 @@
 //!         size: usize
 //!     }
 //!
-//!     impl<J: Json> jsonschema::CustomKeyword<J> for AsciiKeyword {
+//!     impl<J: jsonschema::Json> jsonschema::CustomKeyword<J> for AsciiKeyword {
 //!         fn is_valid(&self, instance: &J) -> bool {
 //!             if let Some(string) = instance.as_string() {
 //!                  let string = string.borrow();
@@ -94,7 +93,7 @@
 //!         }
 //!     }
 //!
-//!     fn ascii_keyword_factory<J: Json>(schema: &J) -> Box<dyn jsonschema::CustomKeyword<J>> {
+//!     fn ascii_keyword_factory<J: jsonschema::Json>(schema: &J) -> Box<dyn jsonschema::CustomKeyword<J>> {
 //!         Box::new(AsciiKeyword { size: 42 })
 //!     }
 //!
@@ -147,6 +146,7 @@ pub use crate::{
     },
     vocabulary::CustomKeyword,
 };
+pub use jsonlike::Json;
 
 #[cfg(test)]
 mod tests {

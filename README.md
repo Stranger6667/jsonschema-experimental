@@ -136,7 +136,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ```rust
 use serde_json::json;
-use jsonlike::prelude::*;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -161,12 +160,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
+    // Stateful custom keyword
     #[derive(Debug)]
     struct AsciiKeyword {
         size: usize
     }
 
-    impl<J: Json> jsonschema::CustomKeyword<J> for AsciiKeyword {
+    impl<J: jsonschema::Json> jsonschema::CustomKeyword<J> for AsciiKeyword {
         fn is_valid(&self, instance: &J) -> bool {
             if let Some(string) = instance.as_string() {
                  let string = string.borrow();
@@ -177,7 +177,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    fn ascii_keyword_factory(schema: &impl Json) -> Box<dyn jsonschema::CustomKeyword<J>> {
+    // Custom keyword factory
+    fn ascii_keyword_factory<J: jsonschema::Json>(schema: &J) -> Box<dyn jsonschema::CustomKeyword<J>> {
         Box::new(AsciiKeyword { size: 42 })
     }
 
