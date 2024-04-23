@@ -57,10 +57,4 @@ impl<'a, J: Json> ValidatorBuilder<'a, J> {
         self.keywords.insert(name.into(), Arc::new(factory));
         self
     }
-    fn nnn(&self, v: &'a J) {
-        if let Some(keyword) = self.keywords.get("foo") {
-            let k = keyword.init(v);
-            k.is_valid(v);
-        }
-    }
 }
