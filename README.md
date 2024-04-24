@@ -142,7 +142,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ... omitted for brevity
     struct Resolver;
 
-    impl jsonschema::ReferenceResolver for Resolver {};
+    impl jsonschema::ReferenceResolver for Resolver {
+        fn resolve_external(&self, url: &str) -> impl core::future::Future<Output = ()> {
+            async {}
+        }
+    };
 
     struct FixedSize {
         size: usize,
