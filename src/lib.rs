@@ -83,21 +83,22 @@
 //!
 //!     #[derive(Debug)]
 //!     struct AsciiKeyword {
-//!         size: usize
+//!         max_size: usize
 //!     }
 //!
 //!     impl<J: Json> jsonschema::Keyword<J> for AsciiKeyword {
 //!         fn is_valid(&self, instance: &J) -> bool {
 //!             if let Some(string) = instance.as_string().map(AsRef::as_ref) {
-//!                 string.len() == self.size && string.chars().all(|c| c.is_ascii())
-//!             } else {
-//!                 true
+//!                 if string.is_ascii() {
+//!                     return string.len() <= self.max_size;
+//!                 }
 //!             }
+//!             true
 //!         }
 //!     }
 //!
 //!     fn ascii_keyword_factory<J: Json>(schema: &J) -> BuildResult<BoxedKeyword<J>> {
-//!         Ok(Box::new(AsciiKeyword { size: 42 }))
+//!         Ok(Box::new(AsciiKeyword { max_size: 42 }))
 //!     }
 //!
 //!     let validator = jsonschema::ValidatorBuilder::default()
@@ -113,7 +114,7 @@
 //!         .keyword(
 //!             "ascii",
 //!             |schema| -> BuildResult<BoxedKeyword<_>> {
-//!                 Ok(Box::new(AsciiKeyword { size: 42 }))
+//!                 Ok(Box::new(AsciiKeyword { max_size: 42 }))
 //!             }
 //!         )
 //!         .keyword("also-ascii", ascii_keyword_factory)
