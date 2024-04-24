@@ -2,6 +2,8 @@ use std::sync::Arc;
 
 use jsonlike::Json;
 
+use crate::{BoxedKeyword, BuildResult};
+
 #[derive(Debug, Clone)]
 pub(crate) enum KeywordValue<J: Json> {
     Type(Type),
@@ -20,19 +22,19 @@ mod sealed {
 }
 
 pub trait KeywordFactory<'a, J: Json>: Send + Sync + sealed::Sealed<J> + 'a {
-    fn init(&self, schema: &'a J) -> Box<dyn Keyword<J>>;
+    fn init(&self, schema: &'a J) -> BuildResult<BoxedKeyword<J>>;
 }
 
 impl<'a, F, J: Json + 'a> sealed::Sealed<J> for F where
-    F: Fn(&'a J) -> Box<dyn Keyword<J>> + Send + Sync + 'a
+    F: Fn(&'a J) -> BuildResult<BoxedKeyword<J>> + Send + Sync + 'a
 {
 }
 
 impl<'a, F, J: Json + 'a> KeywordFactory<'a, J> for F
 where
-    F: Fn(&'a J) -> Box<dyn Keyword<J>> + Send + Sync + 'a,
+    F: Fn(&'a J) -> BuildResult<BoxedKeyword<J>> + Send + Sync + 'a,
 {
-    fn init(&self, schema: &'a J) -> Box<dyn Keyword<J>> {
+    fn init(&self, schema: &'a J) -> BuildResult<BoxedKeyword<J>> {
         self(schema)
     }
 }

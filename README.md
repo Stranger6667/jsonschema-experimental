@@ -135,14 +135,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 ### Customization
 
 ```rust
-use serde_json::json;
+use jsonschema::{Json, Draft, BuildResult, BoxedFormat, BoxedKeyword};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ... omitted for brevity
-    struct CustomResolver;
+    struct Resolver;
 
-    impl jsonschema::ReferenceResolver for CustomResolver {};
+    impl jsonschema::ReferenceResolver for Resolver {};
 
     struct FixedSize {
         size: usize,
@@ -154,8 +154,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    fn fixed_size_factory<J: jsonschema::Json>(schema: &J) -> jsonschema::BoxedFormat {
-        Box::new(FixedSize { size: 43 })
+    fn fixed_size_factory<J: Json>(schema: &J) -> BuildResult<BoxedFormat> {
+        Ok(Box::new(FixedSize { size: 43 }))
     }
 
     #[derive(Debug)]
@@ -163,7 +163,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         size: usize
     }
 
-    impl<J: jsonschema::Json> jsonschema::Keyword<J> for AsciiKeyword {
+    impl<J: Json> jsonschema::Keyword<J> for AsciiKeyword {
         fn is_valid(&self, instance: &J) -> bool {
             if let Some(string) = instance.as_string().map(AsRef::as_ref) {
                 string.len() == self.size && string.chars().all(|c| c.is_ascii())
@@ -173,31 +173,29 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    fn ascii_keyword_factory<J: jsonschema::Json>(schema: &J) -> jsonschema::BoxedKeyword<J> {
-        Box::new(AsciiKeyword { size: 42 })
+    fn ascii_keyword_factory<J: Json>(schema: &J) -> BuildResult<BoxedKeyword<J>> {
+        Ok(Box::new(AsciiKeyword { size: 42 }))
     }
 
     let validator = jsonschema::ValidatorBuilder::default()
-        .draft(jsonschema::Draft::Draft07)
-        .resolver(CustomResolver)
+        .resolver(Resolver)
         .format(
             "fixed-size-1",
-            |schema| -> jsonschema::BoxedFormat {
-                Box::new(FixedSize { size: 5 })
+            |schema| -> BuildResult<BoxedFormat> {
+                Ok(Box::new(FixedSize { size: 5 }))
             }
         )
         .format("fixed-size-2", fixed_size_factory)
         .keyword(
             "ascii",
-            |schema| -> jsonschema::BoxedKeyword<_> {
-                Box::new(AsciiKeyword { size: 42 })
+            |schema| -> BuildResult<BoxedKeyword<_>> {
+                Ok(Box::new(AsciiKeyword { size: 42 }))
             }
         )
         .keyword("also-ascii", ascii_keyword_factory)
         .build(&schema)
         .await?;
 
-    validator.validate(&instance)?;
     Ok(())
 }
 ```

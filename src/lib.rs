@@ -1,5 +1,7 @@
 //!
 //! ```rust
+//! use jsonschema::{Json, Draft, BuildResult, BoxedFormat, BoxedKeyword};
+//!
 //! #[cfg(feature = "serde_json")]
 //! async fn test() -> Result<(), Box<dyn std::error::Error>> {
 //!     let schema = serde_json::json!({"type": "integer"});
@@ -32,11 +34,11 @@
 //!     let validator = jsonschema::blocking::validator_for(&schema)?;
 //!     // Specific draft
 //!     let validator = jsonschema::ValidatorBuilder::default()
-//!         .draft(jsonschema::Draft::Draft04)
+//!         .draft(Draft::Draft04)
 //!         .build(&schema)
 //!         .await?;
 //!     let validator = jsonschema::blocking::ValidatorBuilder::default()
-//!         .draft(jsonschema::Draft::Draft04)
+//!         .draft(Draft::Draft04)
 //!         .build(&schema)?;
 //!
 //!     // Boolean result
@@ -71,8 +73,8 @@
 //!         }
 //!     }
 //!
-//!     fn fixed_size_factory<J: jsonschema::Json>(schema: &J) -> jsonschema::BoxedFormat {
-//!         Box::new(FixedSize { size: 43 })
+//!     fn fixed_size_factory<J: Json>(schema: &J) -> BuildResult<BoxedFormat> {
+//!         Ok(Box::new(FixedSize { size: 43 }))
 //!     }
 //!
 //!     #[derive(Debug)]
@@ -80,7 +82,7 @@
 //!         size: usize
 //!     }
 //!
-//!     impl<J: jsonschema::Json> jsonschema::Keyword<J> for AsciiKeyword {
+//!     impl<J: Json> jsonschema::Keyword<J> for AsciiKeyword {
 //!         fn is_valid(&self, instance: &J) -> bool {
 //!             if let Some(string) = instance.as_string().map(AsRef::as_ref) {
 //!                 string.len() == self.size && string.chars().all(|c| c.is_ascii())
@@ -90,23 +92,23 @@
 //!         }
 //!     }
 //!
-//!     fn ascii_keyword_factory<J: jsonschema::Json>(schema: &J) -> jsonschema::BoxedKeyword<J> {
-//!         Box::new(AsciiKeyword { size: 42 })
+//!     fn ascii_keyword_factory<J: Json>(schema: &J) -> BuildResult<BoxedKeyword<J>> {
+//!         Ok(Box::new(AsciiKeyword { size: 42 }))
 //!     }
 //!
 //!     let validator = jsonschema::ValidatorBuilder::default()
 //!         .resolver(Resolver)
 //!         .format(
-//!             "custom",
-//!             |schema| -> jsonschema::BoxedFormat {
-//!                 Box::new(FixedSize { size: 5 })
+//!             "fixed-size-1",
+//!             |schema| -> BuildResult<BoxedFormat> {
+//!                 Ok(Box::new(FixedSize { size: 5 }))
 //!             }
 //!         )
-//!         .format("custom-2", fixed_size_factory)
+//!         .format("fixed-size-2", fixed_size_factory)
 //!         .keyword(
 //!             "ascii",
-//!             |schema| -> jsonschema::BoxedKeyword<_> {
-//!                 Box::new(AsciiKeyword { size: 42 })
+//!             |schema| -> BuildResult<BoxedKeyword<_>> {
+//!                 Ok(Box::new(AsciiKeyword { size: 42 }))
 //!             }
 //!         )
 //!         .keyword("also-ascii", ascii_keyword_factory)
@@ -151,6 +153,7 @@ pub use jsonlike::Json;
 
 pub type BoxedFormat = Box<dyn Format>;
 pub type BoxedKeyword<J> = Box<dyn Keyword<J>>;
+pub type BuildResult<T> = Result<T, BuildError>;
 
 #[cfg(test)]
 mod tests {
