@@ -8,10 +8,10 @@ use crate::{
     format::FormatFactory,
     resolver::DefaultResolver,
     vocabulary::KeywordFactory,
-    BuildError, ReferenceResolver, Validator,
+    BuildResult, ReferenceResolver, Validator,
 };
 
-pub async fn validator_for<J: Json>(schema: &J) -> Result<Validator<J>, BuildError> {
+pub async fn validator_for<J: Json>(schema: &J) -> BuildResult<Validator<J>> {
     let draft = draft_from_schema(schema);
     ValidatorBuilder::default().draft(draft).build(schema).await
 }
@@ -35,7 +35,7 @@ impl<'a, J: Json> Default for ValidatorBuilder<'a, J> {
 }
 
 impl<'a, J: Json> ValidatorBuilder<'a, J> {
-    pub async fn build(&self, schema: &J) -> Result<Validator<J>, BuildError> {
+    pub async fn build(&self, schema: &J) -> BuildResult<Validator<J>> {
         // TODO: Resolve references
         compiler::compile::<J>(schema, self.draft)
     }

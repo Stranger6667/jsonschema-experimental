@@ -5,7 +5,7 @@ use crate::{
     output::Output,
     validation::builder::ValidatorBuilder as AsyncValidatorBuilder,
     vocabulary::KeywordFactory,
-    BuildError, ReferenceResolver, ValidationError, ValidationErrorIter, Validator,
+    BuildResult, ReferenceResolver, ValidationError, ValidationErrorIter, Validator,
 };
 use jsonlike::Json;
 
@@ -13,7 +13,7 @@ pub fn is_valid<J: Json>(schema: &J, instance: &J) -> bool {
     try_is_valid(schema, instance).expect("Invalid schema")
 }
 
-pub fn try_is_valid<J: Json>(schema: &J, instance: &J) -> Result<bool, BuildError> {
+pub fn try_is_valid<J: Json>(schema: &J, instance: &J) -> BuildResult<bool> {
     Ok(validator_for(schema)?.is_valid(instance))
 }
 
@@ -21,24 +21,21 @@ pub fn validate<J: Json>(schema: &J, instance: &J) -> Result<(), ValidationError
     try_validate(schema, instance).expect("Invalid schema")
 }
 
-pub fn try_validate<J: Json>(
-    schema: &J,
-    instance: &J,
-) -> Result<Result<(), ValidationError>, BuildError> {
+pub fn try_validate<J: Json>(schema: &J, instance: &J) -> BuildResult<Result<(), ValidationError>> {
     Ok(validator_for(schema)?.validate(instance))
 }
 
-pub fn iter_errors<'instance, J: Json>(
+pub fn iter_errors<'i, J: Json>(
     schema: &J,
-    instance: &'instance J,
-) -> ValidationErrorIter<'static, 'instance, J> {
+    instance: &'i J,
+) -> ValidationErrorIter<'static, 'i, J> {
     try_iter_errors(schema, instance).expect("Invalid schema")
 }
 
-pub fn try_iter_errors<'instance, J: Json>(
+pub fn try_iter_errors<'i, J: Json>(
     schema: &J,
-    instance: &'instance J,
-) -> Result<ValidationErrorIter<'static, 'instance, J>, BuildError> {
+    instance: &'i J,
+) -> BuildResult<ValidationErrorIter<'static, 'i, J>> {
     let validator = validator_for(schema)?;
     Ok(validator.iter_errors_once(instance))
 }
@@ -50,11 +47,11 @@ pub fn evaluate<'i, J: Json>(instance: &'i J, schema: &J) -> Output<'static, 'i,
 pub fn try_evaluate<'i, J: Json>(
     instance: &'i J,
     schema: &J,
-) -> Result<Output<'static, 'i, J>, BuildError> {
+) -> BuildResult<Output<'static, 'i, J>> {
     Ok(validator_for(schema)?.evaluate_once(instance))
 }
 
-pub fn validator_for<J: Json>(schema: &J) -> Result<Validator<J>, BuildError> {
+pub fn validator_for<J: Json>(schema: &J) -> BuildResult<Validator<J>> {
     let draft = draft_from_schema(schema);
     ValidatorBuilder::default().draft(draft).build(schema)
 }
@@ -72,7 +69,7 @@ impl<'a, J: Json> Default for ValidatorBuilder<'a, J> {
 }
 
 impl<'a, J: Json> ValidatorBuilder<'a, J> {
-    pub fn build(&self, schema: &J) -> Result<Validator<J>, BuildError> {
+    pub fn build(&self, schema: &J) -> BuildResult<Validator<J>> {
         // TODO: Resolve references
         compiler::compile::<J>(schema, self.inner.draft)
     }

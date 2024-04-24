@@ -2,7 +2,7 @@ use jsonlike::Json;
 pub(crate) mod builder;
 pub(crate) mod iter;
 use crate::{
-    cow::LeanCow, graph, output::Output, vocabulary::KeywordValue, BuildError, ValidationError,
+    cow::LeanCow, graph, output::Output, vocabulary::KeywordValue, BuildResult, ValidationError,
 };
 use builder::validator_for;
 use iter::ValidationErrorIter;
@@ -13,7 +13,7 @@ pub async fn is_valid<J: Json>(schema: &J, instance: &J) -> bool {
         .expect("Invalid schema")
 }
 
-pub async fn try_is_valid<J: Json>(schema: &J, instance: &J) -> Result<bool, BuildError> {
+pub async fn try_is_valid<J: Json>(schema: &J, instance: &J) -> BuildResult<bool> {
     Ok(validator_for(schema).await?.is_valid(instance))
 }
 
@@ -26,23 +26,23 @@ pub async fn validate<J: Json>(schema: &J, instance: &J) -> Result<(), Validatio
 pub async fn try_validate<J: Json>(
     schema: &J,
     instance: &J,
-) -> Result<Result<(), ValidationError>, BuildError> {
+) -> BuildResult<Result<(), ValidationError>> {
     Ok(validator_for(schema).await?.validate(instance))
 }
 
-pub async fn iter_errors<'schema, 'instance, J: Json>(
-    schema: &'schema J,
-    instance: &'instance J,
-) -> ValidationErrorIter<'static, 'instance, J> {
+pub async fn iter_errors<'s, 'i, J: Json>(
+    schema: &'s J,
+    instance: &'i J,
+) -> ValidationErrorIter<'static, 'i, J> {
     try_iter_errors(schema, instance)
         .await
         .expect("Invalid schema")
 }
 
-pub async fn try_iter_errors<'schema, 'instance, J: Json>(
-    schema: &'schema J,
-    instance: &'instance J,
-) -> Result<ValidationErrorIter<'static, 'instance, J>, BuildError> {
+pub async fn try_iter_errors<'s, 'i, J: Json>(
+    schema: &'s J,
+    instance: &'i J,
+) -> BuildResult<ValidationErrorIter<'static, 'i, J>> {
     let validator = validator_for(schema).await?;
     Ok(validator.iter_errors_once(instance))
 }
@@ -56,7 +56,7 @@ pub async fn evaluate<'i, J: Json>(instance: &'i J, schema: &J) -> Output<'stati
 pub async fn try_evaluate<'i, J: Json>(
     instance: &'i J,
     schema: &J,
-) -> Result<Output<'static, 'i, J>, BuildError> {
+) -> BuildResult<Output<'static, 'i, J>> {
     Ok(validator_for(schema).await?.evaluate_once(instance))
 }
 
