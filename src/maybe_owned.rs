@@ -1,18 +1,18 @@
 use std::ops::Deref;
 
 #[derive(Debug)]
-pub(crate) enum LeanCow<'a, T> {
+pub(crate) enum MaybeOwned<'a, T> {
     Borrowed(&'a T),
     Owned(T),
 }
 
-impl<T> Deref for LeanCow<'_, T> {
+impl<T> Deref for MaybeOwned<'_, T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
         match self {
-            LeanCow::Borrowed(b) => b,
-            LeanCow::Owned(o) => o,
+            MaybeOwned::Borrowed(b) => b,
+            MaybeOwned::Owned(o) => o,
         }
     }
 }

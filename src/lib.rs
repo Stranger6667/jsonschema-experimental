@@ -125,11 +125,11 @@
 //! ```
 pub mod blocking;
 mod compiler;
-mod cow;
 mod drafts;
 mod error;
 mod format;
 mod graph;
+mod maybe_owned;
 pub mod output;
 mod resolver;
 mod validation;

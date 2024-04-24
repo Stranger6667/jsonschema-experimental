@@ -1,13 +1,16 @@
-use crate::{cow::LeanCow, Validator};
+use crate::{maybe_owned::MaybeOwned, Validator};
 use jsonlike::Json;
 
 pub struct Output<'v, 'i, J: Json> {
-    validator: LeanCow<'v, Validator<J>>,
+    validator: MaybeOwned<'v, Validator<J>>,
     instance: &'i J,
 }
 
 impl<'v, 'i, J: Json> Output<'v, 'i, J> {
-    pub(crate) fn new(validator: LeanCow<'v, Validator<J>>, instance: &'i J) -> Output<'v, 'i, J> {
+    pub(crate) fn new(
+        validator: MaybeOwned<'v, Validator<J>>,
+        instance: &'i J,
+    ) -> Output<'v, 'i, J> {
         Output {
             validator,
             instance,

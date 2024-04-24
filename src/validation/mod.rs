@@ -2,7 +2,8 @@ use jsonlike::Json;
 pub(crate) mod builder;
 pub(crate) mod iter;
 use crate::{
-    cow::LeanCow, graph, output::Output, vocabulary::KeywordValue, BuildResult, ValidationError,
+    graph, maybe_owned::MaybeOwned, output::Output, vocabulary::KeywordValue, BuildResult,
+    ValidationError,
 };
 use builder::validator_for;
 use iter::ValidationErrorIter;
@@ -80,16 +81,16 @@ impl<J: Json> Validator<J> {
         }
     }
     pub fn iter_errors<'v, 'i>(&'v self, instance: &'i J) -> ValidationErrorIter<'v, 'i, J> {
-        ValidationErrorIter::new(LeanCow::Borrowed(self), instance)
+        ValidationErrorIter::new(MaybeOwned::Borrowed(self), instance)
     }
     pub(crate) fn iter_errors_once(self, instance: &J) -> ValidationErrorIter<'static, '_, J> {
-        ValidationErrorIter::new(LeanCow::Owned(self), instance)
+        ValidationErrorIter::new(MaybeOwned::Owned(self), instance)
     }
     pub fn evaluate<'v, 'i>(&'v self, instance: &'i J) -> Output<'v, 'i, J> {
-        Output::new(LeanCow::Borrowed(self), instance)
+        Output::new(MaybeOwned::Borrowed(self), instance)
     }
     pub(crate) fn evaluate_once(self, instance: &J) -> Output<'static, '_, J> {
-        Output::new(LeanCow::Owned(self), instance)
+        Output::new(MaybeOwned::Owned(self), instance)
     }
 }
 
