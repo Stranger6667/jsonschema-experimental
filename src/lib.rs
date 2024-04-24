@@ -97,6 +97,7 @@
 //!     }
 //!
 //!     let validator = jsonschema::ValidatorBuilder::default()
+//!         .draft(Draft::Draft07)
 //!         .resolver(Resolver)
 //!         .format(
 //!             "fixed-size-1",
@@ -115,6 +116,7 @@
 //!         .build(&schema)
 //!         .await?;
 //!     let validator = jsonschema::blocking::ValidatorBuilder::default()
+//!         .draft(Draft::Draft07)
 //!         .resolver(Resolver)
 //!         .format("custom", fixed_size_factory)
 //!         .keyword("ascii", ascii_keyword_factory)

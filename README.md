@@ -178,6 +178,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     let validator = jsonschema::ValidatorBuilder::default()
+        .draft(Draft::Draft07)
         .resolver(Resolver)
         .format(
             "fixed-size-1",
