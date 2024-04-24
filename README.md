@@ -127,7 +127,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ... omitted for brevity
     let verbose = jsonschema::evaluate(&instance, &schema).await.verbose();
     // Serialize validation output to JSON
-    let serialized = serde_json::to_string(&verbose).unwrap();
+    let serialized = serde_json::to_string(&verbose)?;
     Ok(())
 }
 ```
@@ -166,7 +166,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     impl<J: jsonschema::Json> jsonschema::Keyword<J> for AsciiKeyword {
         fn is_valid(&self, instance: &J) -> bool {
             if let Some(string) = instance.as_string().map(AsRef::as_ref) {
-                 string.len() == self.size && string.chars().all(|c| c.is_ascii())
+                string.len() == self.size && string.chars().all(|c| c.is_ascii())
             } else {
                 true
             }
