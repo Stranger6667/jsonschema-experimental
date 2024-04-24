@@ -71,7 +71,7 @@
 //!         }
 //!     }
 //!
-//!     fn fixed_size_factory<J: jsonschema::Json>(schema: &J) -> Box<dyn jsonschema::Format> {
+//!     fn fixed_size_factory<J: jsonschema::Json>(schema: &J) -> jsonschema::BoxedFormat {
 //!         Box::new(FixedSize { size: 43 })
 //!     }
 //!
@@ -90,7 +90,7 @@
 //!         }
 //!     }
 //!
-//!     fn ascii_keyword_factory<J: jsonschema::Json>(schema: &J) -> Box<dyn jsonschema::Keyword<J>> {
+//!     fn ascii_keyword_factory<J: jsonschema::Json>(schema: &J) -> jsonschema::BoxedKeyword<J> {
 //!         Box::new(AsciiKeyword { size: 42 })
 //!     }
 //!
@@ -98,14 +98,14 @@
 //!         .resolver(Resolver)
 //!         .format(
 //!             "custom",
-//!             |schema| -> Box<dyn jsonschema::Format> {
+//!             |schema| -> jsonschema::BoxedFormat {
 //!                 Box::new(FixedSize { size: 5 })
 //!             }
 //!         )
 //!         .format("custom-2", fixed_size_factory)
 //!         .keyword(
 //!             "ascii",
-//!             |schema| -> Box<dyn jsonschema::Keyword<_>> {
+//!             |schema| -> jsonschema::BoxedKeyword<_> {
 //!                 Box::new(AsciiKeyword { size: 42 })
 //!             }
 //!         )
@@ -148,6 +148,9 @@ pub use crate::{
     vocabulary::Keyword,
 };
 pub use jsonlike::Json;
+
+pub type BoxedFormat = Box<dyn Format>;
+pub type BoxedKeyword<J> = Box<dyn Keyword<J>>;
 
 #[cfg(test)]
 mod tests {
