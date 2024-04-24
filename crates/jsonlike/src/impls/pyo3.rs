@@ -150,6 +150,12 @@ impl Json for PyAny {
     fn try_equal(&self, other: &Self) -> Result<bool, JsonError> {
         Ok(self.eq(other)?)
     }
+    fn from_str(s: &str) -> Result<Self, JsonError>
+    where
+        Self: Sized,
+    {
+        todo!("Parse JSON with ... python's json module?")
+    }
 }
 
 #[cfg(test)]

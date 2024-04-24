@@ -142,9 +142,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ... omitted for brevity
     struct Resolver;
 
-    impl jsonschema::ReferenceResolver for Resolver {
-        fn resolve_external(&self, url: &str) -> impl core::future::Future<Output = ()> {
-            async {}
+    impl<J: Json> jsonschema::ReferenceResolver<J> for Resolver {
+        fn resolve_external(&self, url: &str) -> impl core::future::Future<Output = BuildResult<J>> {
+            async { Ok(J::from_str("{}")?) }
         }
     };
 

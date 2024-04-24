@@ -77,7 +77,7 @@ impl<'a, J: Json> ValidatorBuilder<'a, J> {
         self.inner.draft(draft);
         self
     }
-    pub fn resolver(&mut self, resolver: impl ReferenceResolver + 'static) -> &mut Self {
+    pub fn resolver(&mut self, resolver: impl ReferenceResolver<J> + 'static) -> &mut Self {
         self.inner.resolver(resolver);
         self
     }

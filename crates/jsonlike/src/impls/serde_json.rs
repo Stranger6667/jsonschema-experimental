@@ -1,5 +1,3 @@
-use core::fmt;
-
 use crate::prelude::*;
 
 pub struct ObjectIter<'a>(serde_json::map::Iter<'a>);
@@ -9,23 +7,6 @@ impl<'a> Iterator for ObjectIter<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.0.next().map(|(k, v)| (Ok(k), v))
-    }
-}
-
-#[derive(Debug)]
-struct Error;
-
-impl fmt::Display for Error {
-    fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result {
-        Ok(())
-    }
-}
-
-impl std::error::Error for Error {}
-
-impl From<Error> for JsonError {
-    fn from(value: Error) -> Self {
-        JsonError::new(Box::new(value))
     }
 }
 
@@ -132,6 +113,12 @@ impl Json for serde_json::Value {
 
     fn try_equal(&self, other: &Self) -> Result<bool, JsonError> {
         Ok(self.eq(other))
+    }
+    fn from_str(s: &str) -> Result<Self, JsonError>
+    where
+        Self: Sized,
+    {
+        serde_json::from_str(s).map_err(|err| JsonError::new(Box::new(err)))
     }
 }
 
@@ -290,5 +277,13 @@ mod tests {
     fn test_equal(value: Value) {
         assert!(value.equal(&value));
         assert!(!value.equal(&json!("something else")));
+    }
+
+    #[test]
+    fn test_from_str() {
+        let value = json!({"a": 1});
+        let s = value.to_string();
+        let parsed = Value::from_str(&s).unwrap();
+        assert_eq!(value, parsed);
     }
 }

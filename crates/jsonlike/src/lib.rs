@@ -84,6 +84,9 @@ pub trait Json: fmt::Debug {
         self.try_equal(other).expect("Failed to compare values")
     }
     fn try_equal(&self, other: &Self) -> Result<bool, JsonError>;
+    fn from_str(s: &str) -> Result<Self, JsonError>
+    where
+        Self: Sized;
 }
 
 pub trait JsonObject {

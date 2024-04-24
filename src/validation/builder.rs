@@ -18,7 +18,7 @@ pub async fn validator_for<J: Json>(schema: &J) -> BuildResult<Validator<J>> {
 
 pub struct ValidatorBuilder<'a, J: Json> {
     pub(crate) draft: Draft,
-    pub(crate) resolver: Arc<dyn ReferenceResolver>,
+    pub(crate) resolver: Arc<dyn ReferenceResolver<J>>,
     pub(crate) formats: HashMap<String, Arc<dyn FormatFactory<'a, J>>>,
     pub(crate) keywords: HashMap<String, Arc<dyn KeywordFactory<'a, J>>>,
 }
@@ -43,7 +43,7 @@ impl<'a, J: Json> ValidatorBuilder<'a, J> {
         self.draft = draft;
         self
     }
-    pub fn resolver(&mut self, resolver: impl ReferenceResolver + 'static) -> &mut Self {
+    pub fn resolver(&mut self, resolver: impl ReferenceResolver<J> + 'static) -> &mut Self {
         self.resolver = Arc::new(resolver);
         self
     }
