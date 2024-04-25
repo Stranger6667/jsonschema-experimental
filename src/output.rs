@@ -44,8 +44,8 @@ pub struct List<J: Json> {
     pub nested: Vec<OutputUnit<J>>,
 }
 
-// TODO: custom `Serialize` to match the spec
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 #[derive(Debug)]
 pub struct OutputUnit<J: Json> {
     pub valid: bool,
