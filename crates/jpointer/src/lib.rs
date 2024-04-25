@@ -60,7 +60,10 @@ impl fmt::Display for Segment {
                 }
                 Ok(())
             }
+            #[cfg(not(feature = "itoa"))]
             Segment::Index(idx) => f.write_fmt(format_args!("{}", idx)),
+            #[cfg(feature = "itoa")]
+            Segment::Index(idx) => f.write_str(itoa::Buffer::new().format(*idx)),
         }
     }
 }
