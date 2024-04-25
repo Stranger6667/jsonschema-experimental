@@ -161,6 +161,11 @@ mod tests {
     }
 
     #[test]
+    fn test_json_pointer_node_to_vec_empty() {
+        assert_eq!(JsonPointerNode::new().to_vec(), vec![]);
+    }
+
+    #[test]
     fn test_json_pointer_node_to_vec() {
         let root = JsonPointerNode::new();
         let node1 = root.push("foo".to_string());
