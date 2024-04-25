@@ -15,13 +15,19 @@ members = [
 serde = { version = "1", features = ["derive"], optional = true }
 serde_json = { version = "1", optional = true }
 
+[dependencies.jpointer]
+path = "crates/jpointer"
+default-features = false
+
+[dependencies.jsonlike]
+path = "crates/jsonlike"
+default-features = false
+
 [dev-dependencies]
 tokio = { version = "1.34", features = ["full"] }
 
 [features]
 default = ["serde", "serde_json"]
-serde = ["dep:serde"]
+serde = ["dep:serde", "jpointer/serde"]
 serde_json = ["dep:serde_json", "jsonlike/serde_json"]
 
-[dependencies.jsonlike]
-path = "crates/jsonlike"

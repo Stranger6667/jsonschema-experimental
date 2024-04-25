@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 
 use crate::{maybe_owned::MaybeOwned, Validator};
+use jpointer::JsonPointer;
 use jsonlike::Json;
 
 pub struct Output<'v, 'i, J: Json> {
@@ -49,9 +50,9 @@ pub struct List<J: Json> {
 #[derive(Debug)]
 pub struct OutputUnit<J: Json> {
     pub valid: bool,
-    pub evaluation_path: String,
+    pub evaluation_path: JsonPointer,
     pub schema_location: String,
-    pub instance_location: String,
+    pub instance_location: JsonPointer,
     pub nested: Option<Vec<OutputUnit<J>>>,
     pub annotations: Option<BTreeMap<String, J>>,
     pub dropped_annotations: Option<BTreeMap<String, J>>,

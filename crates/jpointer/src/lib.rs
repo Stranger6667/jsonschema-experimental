@@ -21,6 +21,23 @@ impl fmt::Display for JsonPointer {
     }
 }
 
+#[cfg(feature = "serde")]
+impl serde::Serialize for JsonPointer {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.collect_str(self)
+    }
+}
+
+impl From<JsonPointerNode<'_>> for JsonPointer {
+    #[inline]
+    fn from(node: JsonPointerNode<'_>) -> Self {
+        JsonPointer(node.to_vec())
+    }
+}
+
 /// A segment within a JSON pointer.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Segment {
@@ -111,13 +128,6 @@ impl<'a> JsonPointerNode<'a> {
     }
 }
 
-impl From<JsonPointerNode<'_>> for JsonPointer {
-    #[inline]
-    fn from(node: JsonPointerNode<'_>) -> Self {
-        JsonPointer(node.to_vec())
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -195,5 +205,17 @@ mod tests {
             json_pointer,
             JsonPointer(vec![Segment::Key("foo".into()), Segment::Index(42)])
         );
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_json_pointer_serde() {
+        let pointer = JsonPointer(vec![
+            Segment::Key("foo".into()),
+            Segment::Index(42),
+            Segment::Key("bar".into()),
+        ]);
+        let json = serde_json::to_string(&pointer).unwrap();
+        assert_eq!(json, r#""/foo/42/bar""#);
     }
 }
