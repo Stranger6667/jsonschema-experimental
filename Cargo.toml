@@ -5,6 +5,7 @@ edition = "2021"
 
 [workspace]
 members = [
+    "crates/jpointer",
     "crates/jsonlike",
     "crates/referencing",
     "crates/referencing-suite",
