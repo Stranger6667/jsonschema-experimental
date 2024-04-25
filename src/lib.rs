@@ -20,13 +20,13 @@
 //!     for error in jsonschema::blocking::iter_errors(&instance, &schema) {
 //!         println!("{}", error);
 //!     }
-//!     // One-off collecting validation results into a struct conforming to the JSON Schema "Verbose" output format
-//!     let verbose = jsonschema::evaluate(&instance, &schema).await.verbose();
-//!     let verbose = jsonschema::blocking::evaluate(&instance, &schema).verbose();
+//!     // One-off collecting validation results into a struct conforming to the JSON Schema "Hierarchical" output format
+//!     let output = jsonschema::evaluate(&instance, &schema).await.hierarchical();
+//!     let output = jsonschema::blocking::evaluate(&instance, &schema).hierarchical();
 //!     // Serialize validation output to JSON (requires the `serde` feature)
 //!     #[cfg(feature = "serde")]
 //!     {
-//!         let serialized = serde_json::to_string(&verbose)?;
+//!         let serialized = serde_json::to_string(&output)?;
 //!     }
 //!
 //!     // Async by default, autodetect draft based on the `$schema` property
@@ -51,12 +51,12 @@
 //!         println!("{}", error);
 //!     }
 //!
-//!     // Collecting validation results into a struct conforming to the JSON Schema "Verbose" output format
-//!     let verbose = validator.evaluate(&instance).verbose();
-//!     // Serialize validation output to JSON according to the verbose output format
+//!     // Collecting validation results into a struct conforming to the JSON Schema "Hierarchical" output format
+//!     let output = validator.evaluate(&instance).hierarchical();
+//!     // Serialize validation output to JSON according to the output output format
 //!     #[cfg(feature = "serde")]
 //!     {
-//!         let serialized = serde_json::to_string(&verbose)?;
+//!         let serialized = serde_json::to_string(&output)?;
 //!     }
 //!
 //!     struct Resolver;

@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use crate::{maybe_owned::MaybeOwned, Validator};
 use jsonlike::Json;
 
@@ -21,44 +23,39 @@ impl<'v, 'i, J: Json> Output<'v, 'i, J> {
             valid: self.validator.is_valid(self.instance),
         }
     }
-    pub fn basic(&self) -> OutputUnit {
+    pub fn list(&self) -> List<J> {
         todo!()
     }
-    pub fn detailed(&self) -> OutputUnit {
-        todo!()
-    }
-    pub fn verbose(&self) -> OutputUnit {
+    pub fn hierarchical(&self) -> Hierarchical<J> {
         todo!()
     }
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[derive(Debug)]
 pub struct Flag {
     pub valid: bool,
+}
+
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[derive(Debug)]
+pub struct List<J: Json> {
+    pub valid: bool,
+    pub nested: Vec<OutputUnit<J>>,
 }
 
 // TODO: custom `Serialize` to match the spec
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Debug)]
-pub enum OutputUnit {
-    Valid {
-        keyword_location: String,
-        absolute_keyword_location: Option<String>,
-        instance_location: String,
-        annotations: Vec<OutputUnit>,
-    },
-    SingleError {
-        keyword_location: String,
-        absolute_keyword_location: Option<String>,
-        instance_location: String,
-        error: String,
-        annotations: Vec<OutputUnit>,
-    },
-    MultipleErrors {
-        keyword_location: String,
-        absolute_keyword_location: Option<String>,
-        instance_location: String,
-        errors: Vec<OutputUnit>,
-        annotations: Vec<OutputUnit>,
-    },
+pub struct OutputUnit<J: Json> {
+    pub valid: bool,
+    pub evaluation_path: String,
+    pub schema_location: String,
+    pub instance_location: String,
+    pub nested: Option<Vec<OutputUnit<J>>>,
+    pub annotations: Option<BTreeMap<String, J>>,
+    pub dropped_annotations: Option<BTreeMap<String, J>>,
+    pub errors: Option<BTreeMap<String, String>>,
 }
+
+pub type Hierarchical<J> = OutputUnit<J>;

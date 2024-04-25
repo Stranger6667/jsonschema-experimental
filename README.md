@@ -112,12 +112,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Output formatting
 
-`jsonschema` supports multiple output formats for validation results in accordance with the JSON Schema specification:
+`jsonschema` supports multiple output formats for validation results in accordance with the current proposal for the next version of the JSON Schema specification:
 
 - `Flag`
-- `Basic`
-- `Detailed`
-- `Verbose`
+- `List`
+- `Hierarchical`
 
 ```rust
 use serde_json::json;
@@ -125,9 +124,9 @@ use serde_json::json;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ... omitted for brevity
-    let verbose = jsonschema::evaluate(&instance, &schema).await.verbose();
+    let hierarchical = jsonschema::evaluate(&instance, &schema).await.hierarchical();
     // Serialize validation output to JSON
-    let serialized = serde_json::to_string(&verbose)?;
+    let serialized = serde_json::to_string(&hierarchical)?;
     Ok(())
 }
 ```
