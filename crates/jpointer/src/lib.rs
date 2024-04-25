@@ -1,6 +1,12 @@
+//! A lightweight library for working with JSON Pointers (RFC 6901).
+//!
+//! This crate provides a simple and efficient way to represent and build JSON Pointers.
+//!
+//! Note: This crate focuses on the representation and manipulation of JSON Pointers and does not
+//! provide functionality for resolving JSON Pointers against JSON documents.
 use core::{fmt, fmt::Write};
 
-/// JSON Pointer
+/// Owned JSON Pointer.
 /// TODO: Maybe cache the string representation to avoid doing it during serde serialization?
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct JsonPointer(Vec<Segment>);
