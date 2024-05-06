@@ -171,7 +171,7 @@ mod tests {
         assert_eq!(val, "d");
     }
 
-    pub(crate) fn assert_object_iter<'a, J>(value: &'a J)
+    pub(crate) fn assert_object_str_number_iter<'a, J>(value: &'a J)
     where
         J: Json,
         CustomInteger: TryFrom<
@@ -197,7 +197,7 @@ mod tests {
         assert!(iter.next().is_none());
     }
 
-    pub(crate) fn assert_array_iter<'a, J>(value: &'a J)
+    pub(crate) fn assert_array_number_iter<'a, J>(value: &'a J)
     where
         J: Json,
         CustomInteger: TryFrom<

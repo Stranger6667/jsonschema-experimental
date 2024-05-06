@@ -131,9 +131,9 @@ mod tests {
 
     use crate::{
         tests::{
-            assert_array_get, assert_array_iter, assert_as_array, assert_as_boolean,
+            assert_array_get, assert_array_number_iter, assert_as_array, assert_as_boolean,
             assert_as_null, assert_as_number_float, assert_as_number_integer, assert_as_object,
-            assert_as_string, assert_object_get, assert_object_iter, CustomInteger,
+            assert_as_string, assert_object_get, assert_object_str_number_iter, CustomInteger,
         },
         Json,
     };
@@ -177,12 +177,12 @@ mod tests {
 
     #[test]
     fn test_object_iter() {
-        assert_object_iter(&build_object());
+        assert_object_str_number_iter(&build_object());
     }
 
     #[test]
     fn test_array_iter() {
-        assert_array_iter(&build_array());
+        assert_array_number_iter(&build_array());
     }
 
     #[test]

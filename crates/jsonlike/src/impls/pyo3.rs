@@ -163,9 +163,9 @@ mod tests {
     use std::error::Error;
 
     use crate::tests::{
-        assert_array_get, assert_array_iter, assert_as_array, assert_as_boolean, assert_as_null,
-        assert_as_number_float, assert_as_number_integer, assert_as_object, assert_as_string,
-        assert_object_get, assert_object_iter, CustomInteger,
+        assert_array_get, assert_array_number_iter, assert_as_array, assert_as_boolean,
+        assert_as_null, assert_as_number_float, assert_as_number_integer, assert_as_object,
+        assert_as_string, assert_object_get, assert_object_str_number_iter, CustomInteger,
     };
 
     use super::*;
@@ -229,12 +229,12 @@ mod tests {
 
     #[test]
     fn test_object_iter() {
-        pytest(|py| assert_object_iter(build_object(py)));
+        pytest(|py| assert_object_str_number_iter(build_object(py)));
     }
 
     #[test]
     fn test_array_iter() {
-        pytest(|py| assert_array_iter(build_array(py)));
+        pytest(|py| assert_array_number_iter(build_array(py)));
     }
 
     #[test]
